@@ -1,0 +1,31 @@
+gup (0.5.3) frozen unstable; urgency=low
+
+  * Fixed the description in debian/control (Closes #52886).
+  * gup.log moved to /var/log/gup/.
+  * Removed hardcoded path for ctlinnd in gupdate (Closes: #61901).
+  * Now recommends inn or inn2.
+
+ -- Marco d'Itri <md@linux.it>  Fri,  7 Apr 2000 18:24:53 +0200
+
+gup (0.5.2) unstable; urgency=low
+
+  * Fixed detection of failed newsfeeds verification.
+  * If newsfeeds.header has been modified then newsfeeds is built
+    and reloaded.
+  * Signatures are ignored.
+
+ -- Marco d'Itri <md@linux.it>  Fri, 10 Dec 1999 21:07:51 +0100
+
+gup (0.5.1) unstable; urgency=low
+
+  * Corrected /etc/gup.conf path in postinst.
+  * Corrected newsfeeds.header name in README.Debian.
+
+ -- Marco d'Itri <md@linux.it>  Sun, 28 Nov 1999 20:49:21 +0100
+
+gup (0.5) unstable; urgency=low
+
+  * Initial Release with some changes from the original codebase and
+    removal of portability options for non-POSIX systems.
+
+ -- Marco d'Itri <md@linux.it>  Sun,  3 Oct 1999 19:43:35 +0200

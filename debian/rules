@@ -1,0 +1,47 @@
+#!/usr/bin/make -f
+# Original version Copyright by Ian Jackson.
+
+SHELL+= -e
+
+#export DH_VERBOSE=1
+
+build:
+	$(checkdir)
+	make
+	touch build
+
+clean:
+	$(checkdir)
+	-rm -f build
+	-make clean
+	-cd debian && rm -rf tmp files* substvars *debhelper
+
+binary-arch: checkroot build
+	$(checkdir)
+	-rm -rf debian/tmp
+
+	dh_installdirs usr/lib/gup etc/logrotate.d/
+	install --strip --mode=755 gup debian/tmp/usr/lib/gup
+	cp scripts/* debian/tmp/usr/lib/gup
+	cp debian/logrotate debian/tmp/etc/logrotate.d/
+	dh_installmanpages
+	dh_installdocs README INSTALL
+	dh_installchangelogs
+	dh_installcron
+	dh_compress
+	dh_fixperms
+	dh_shlibdeps
+	dh_gencontrol
+	dh_installdeb
+	dh_builddeb
+
+define checkdir
+	test -f debian/rules
+endef
+
+binary: binary-arch
+
+checkroot:
+	test root = "`whoami`"
+
+.PHONY: binary binary-arch binary-indep clean checkroot

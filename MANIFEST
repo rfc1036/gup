@@ -1,0 +1,45 @@
+   File Name		Archive #	Description
+----------------------------------------------------------
+gup                        1	Parent dir
+gup/README                 1	Intro to gup
+gup/INSTALL                1	How to compile and install gup
+gup/MANIFEST               1	This list!
+gup/Makefile               1	Top level makefile
+gup/HISTORY                1	Change history
+gup/main.mk                1	Used to construct the *real* make file
+gup/config                 1	Directory of system config files
+gup/contrib                1	Other people's ideas
+gup/scripts                1	A few scripts for the admin who uses gup
+gup/gup.1                  1	Manpage for the gup program
+gup/sample                 1	What we think gup's home dir looks like
+gup/sample/sites           1	Sites have their data in directories below here
+gup/sample/sites/t         1	Our sample site is called 't'
+gup/gup.h                  1	Includes all other header files
+gup/config.h               1	Do system dependent includes and defs
+gup/patchlevel.h           1	Track changes
+gup/rfc822.h               1	rfc822.* (By RSalz) groks mail headers for us
+gup/gup.c                  2	The main program and simple command processing
+gup/help.c                 1	Generates the help response
+gup/lock.c                 1	Locks a particular site to serialize updates
+gup/misc.c                 1	Bit-bucket
+gup/newsgroups.c           2	Handle the newsgroups command
+gup/prune.c                2	Does all newsgroup pruning
+gup/posix_gunk.c           1	Support routines for non-posix systems
+gup/rfc822.c               2	Groks the mail headers for us - thanks Rich
+gup/wildmat.c              2	Stolen straight out of RSalz's INN sources
+gup/Makefile               2	Makefile for the source
+gup/log.c                  1	Does logging to the logfile and the mail
+gup/mail.c                 2	Handles sending the resultant mail
+gup/config/TEMPLATE        3	Starting point for making new system configs
+gup/config/vanilla         2	A vanilla modern unixen
+gup/config/sunos4          3	SunOS 4.1.x
+gup/config/netbsd          3	NetBSD 0.8a
+gup/sample/config          3	Config file contains sites, passwords, mailids
+gup/sample/sites/t/exclude  3	It has an exclusion list
+gup/sample/sites/t/groups  3	Current subscription list for site 't'
+gup/sample/log             3	This is what a log should look like
+gup/contrib/send-gup       3	A simple interface for the client
+gup/contrib/.gup           3	Contains the host and passwd for send-gup
+gup/scripts/gupdate        3	Rebuild the INN newsfeeds file - needs editing
+gup/scripts/verify         3	Check a gup's home dir - needs editing
+gup/scripts/addsite        3	Add a new site to gup's config

@@ -1,0 +1,8 @@
+/var/log/gup/log {
+	rotate 4
+	weekly
+	compress
+	missingok
+	nocreate
+	notifempty
+}

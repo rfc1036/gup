@@ -1,0 +1,54 @@
+#!/bin/sh -e
+# A script to check gup consistency
+
+gup=/var/lib/gup
+
+# the username that gup runs as
+gup_uid=gup
+
+def=$gup/default
+
+echo "Checking contents of $gup/..."
+if [ ! -e $def/global.header ]; then
+  echo ' Missing global header!'; exit 1
+fi
+if [ ! -e $def/header ]; then
+  echo ' Missing default header!'; exit 1
+fi
+if [ ! -e $def/trailer ]; then
+  echo ' Missing default trailer!'; exit 1
+fi
+#if [ ! -e $def/global.trailer ]; then
+#  echo 'Missing global trailer!'; exit 1
+#fi
+
+cd $gup/sites
+for h in *; do
+  echo "Checking site $h..."
+
+  # header
+  if [ ! -e $h/header ]; then
+    echo " Linking default/header -> $h/header"
+    ln -s $def/header $h/header
+  fi
+
+  # body
+  if [ ! -e $h/groups -a -e $def/groups ]; then
+    echo " Copying basic groups entry -> $h/groups"
+    cp $def/groups $h/groups
+#    chown $gup_uid $h/groups
+  fi
+
+  # trailer
+  if [ ! -e $h/trailer ]; then
+    echo " Linking default/trailer -> $h/trailer"
+    ln -s $def/trailer $h/trailer
+  fi
+
+  # exclusions
+  if [ ! -e $h/exclude -a -e $def/exclude ]; then
+    echo " Linking default/exclude -> $h/exclude"
+    ln -s $def/exclude $h/exclude
+  fi
+done
+

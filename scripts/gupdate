@@ -1,0 +1,154 @@
+#!/bin/sh -e
+# A script to rebuild the newsfeed file after a gup run
+
+gup=/var/lib/gup
+
+# who gets mail
+news_admin=news
+
+# altered sites beautification
+pr="pr -5 -a -t -o5"
+
+# your INN newsfeeds file.  this file is automatically updated by this script
+# by combining the feeds lists for all the sites that gup controls, along
+# with a general-purpose header and trailer for the file as a whole.
+newsfeeds=/etc/news/newsfeeds
+
+# your INN control program, ctlinnd
+ctlinnd="ctlinnd -t 20"
+
+# default path
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+########################### end of user-config stuff ##########################
+cd $gup
+
+# don't run the script if gup is not configured
+if [ ! -f default/global.header ]; then
+  exit 0
+fi
+
+
+update_stamp="/var/spool/news/.gup-last-update"
+tmpfeeds="$newsfeeds-tmp.$$"
+reload_thresh=10
+
+
+# determine what's changed since last time - to save inn from reloading the
+# entire newsfeeds file, and us from wasting our time.
+if [ ! -f $update_stamp ]; then
+  echo "$update_stamp doesn't exist - creating"
+  touch $update_stamp
+  first_update=1		# this must be our first time
+else
+  # decide what's changed, if anything
+  touch ${update_stamp}.new	# prevent anything sneaking in
+  haltered=`find default/global.header -follow -newer $update_stamp`
+  altered=`find sites/ -type f -name groups -newer $update_stamp -print |
+  	   sed -e 's#.*sites/##' -e 's#/groups##'`
+  if [ -z "$altered" -a -z "$haltered" ]; then
+    rm -f ${update_stamp}.new
+    exit 0
+  fi
+  mv -f ${update_stamp}.new ${update_stamp}
+  first_update=0
+fi
+
+{
+# global header
+cat default/global.header
+
+cd sites
+for h in *; do
+  if [ -s $h/groups ]; then
+    echo
+    # header
+    host=$h
+    if [ -s $h/aliases ]; then
+      read aliases junk < $h/aliases
+      host="$host\/$aliases"
+    fi
+    sed -e "s/HOST/$host/g" $h/header
+    # body
+    sed -e 's/$/,\\/g' -e 's/^/  /g' $h/groups
+    # trailer
+    sed -e "s/HOST/$h/g" $h/trailer
+  fi
+done
+cd ..
+
+# global trailer
+if [ -s default/global.trailer ]; then
+  cat default/global.trailer
+fi
+} >$tmpfeeds
+
+
+# commit the new version
+mv -f $newsfeeds.old $newsfeeds.old1 || true
+mv -f $newsfeeds $newsfeeds.old
+mv $tmpfeeds $newsfeeds
+
+# verify that it's ok
+set +e
+$ctlinnd -s checkfile
+ok=$?
+set -e
+
+if [ $ok -eq 0 ]; then
+  echo "${newsfeeds}: verification succeeded"
+  echo
+else
+  echo "argh!  $newsfeeds verification failed - moving back previous version"
+  mv $newsfeeds $newsfeeds.broken
+  mv -f $newsfeeds.old $newsfeeds || true
+  /usr/sbin/sendmail -t <<SIGH
+To: $news_admin
+Subject: gup newsfeeds failure!
+
+gup has gone weird - the generated newsfeeds file has been rejected by
+$verify.  Please check:
+	$newsfeeds.broken
+
+to determine the source of the problem.
+
+yours in efficiency,
+the gupdate daemon
+SIGH
+  # force a complete reload next time
+  rm -f ${update_stamp}
+  exit 1
+fi
+
+# tell INN about it
+# inn newsfeed reloads are expensive, particularly for channels - only
+# reload what is necessary, except if there are more than ${reload_thresh}
+# sites that need dealing with.
+set +e
+if [ $first_update -eq 1 -o -n "$haltered" ]; then
+  echo "full update: ctlinnd reload newsfeeds"
+  $ctlinnd reload newsfeeds gupdate
+else
+  echo "sites altered:"
+  echo $altered | $pr
+  echo
+
+  if [ `echo $altered | wc -w | awk '{print $1}'` -le $reload_thresh ]; then
+    for site in $altered; do
+      if [ -s sites/$site/groups ]; then
+        echo "$site: ctlinnd begin $site"
+        $ctlinnd begin $site
+      else
+        echo "$site: ctlinnd drop $site"
+        $ctlinnd drop $site
+      fi
+      echo
+    done
+  else
+    echo "ctlinnd reload newsfeeds"
+    $ctlinnd reload newsfeeds gupdate
+  fi
+fi
+
+exit 0
+

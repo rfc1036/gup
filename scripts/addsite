@@ -1,0 +1,28 @@
+#!/bin/sh -e
+# This script create the data files for a new site
+
+d=/var/lib/gup
+
+# the username that gup runs as
+gup_uid=gup
+
+if [ -z "$1" ]; then
+  echo "Usage: gup: newsite [header [trailer]]"
+  exit 1
+fi
+
+h=$1
+header=$2
+trailer=$3
+
+cd $d/sites
+mkdir $h
+
+if [ -n "$header" ]; then
+  ln -s $d/headers/$header $h/header
+fi
+if [ -n "$trailer" ]; then
+  ln -s $d/trailers/$trailer $h/trailer
+fi
+chown -R $gup_uid $h
+

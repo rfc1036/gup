@@ -1,0 +1,21 @@
+#!/bin/sh
+# This script handles the inbound newsgroup update requests
+
+gup=/var/lib/gup
+
+# don't run the script if gup is not configured
+if [ ! -f $gup/default/global.header ]; then
+  echo "ERROR: gup is not configured"
+  exit 69		# EX_UNAVAILABLE
+fi
+
+if [ -f /etc/gup.headers ]; then
+  OPTM="-m /etc/gup.headers"
+fi
+
+# Run the group update program
+# Should not return
+exec /usr/lib/gup/gup $OPTM -d $gup -l /var/log/gup/log
+
+exit 69
+

@@ -1,0 +1,125 @@
+		How to make and install gup
+		===========================
+
+
+gup is known to work on:
+
+	o	NETBSD 0.8a
+	o	SunOS 4.1.2, SunOS 4.1.3
+	o	Ultrix V4.3
+
+Maybe you can help us add to this list?
+
+
+How to make gup
+---------------
+
+If you are familiar with news and net sources, edit the Makefile and
+run "make install".
+
+If you are new to net sources (you probably don't want this program
+however), do the following:
+
+
+1)	Unshar
+
+
+2)	Nominate the appropriate config file in the Makefile.
+
+	Select the appropriate file from the ./config directory that
+	matches your system.
+
+	If none of the existing config files work for you system, you
+	will need to create one for your system. Take a copy of
+	config/TEMPLATE as a starting point. Doco is include in there.
+
+
+3)	Edit the other parameters in the Makefile to suit your
+	news installation. You need to know the location of you
+	"active" file and a bit about your mail system.
+
+4)	Run "make" or "make install"
+
+	"make install" copies the executable and manpage.
+
+
+How to install gup
+------------------
+
+Gup is a mail-server program that has been designed to be place in a
+.forward such that inbound mails are fed into gup via stdin.
+Furthermore, gup needs a home directory and a 'config' file before it
+can be used. While you are not constrained to any particular
+arrangement, this section outlines the setup we use. I'm assuming that
+only news administrators will be installing gup so I'm not going to spell
+out the obvious.
+
+1.	Create a 'gup' user in your /etc/passwd file. It doesn't have
+	to be called 'gup'. You may want an alias for 'gup' if you
+	want to use a 'formal' mail address for gup such as
+	"news-update" or some such.
+
+2.	Create a home directory for 'gup' with appropriate
+	permissions.
+
+3.	Create a 'config' file in gup's home directory.
+
+	This file has one line per site. Each line contains three
+	white-space separated tokens: sitename, mailid, and password.
+	Eg:
+
+	werple	frodo3$_dItz34	andrew@apana.org.au
+	torps	Za67H122ph__	zaph@torps
+
+	For testing purposes, place this line in there:
+
+	test	test		mymailid
+
+	Where mymailid is your mail id.
+
+	When a remote administrator sends in a request, the 'site'
+	command must have a host and password that matches the entry
+	in the 'config' file so keep this file well protected!
+
+
+4.	Create a .forward file in gup's home directory so that all
+	inbound mails are fed to the gup program. Here's what mine
+	looks like:
+
+"|/home/gup/bin/gup -d /home/gup -l /var/log/gup -m /home/gup/mail_headers"
+
+	All the options etc are explained in the manpage so they're
+	not covered here.
+
+And that's it! You are now ready to give gup a blast. Send it some
+mail with the following in the body of the mail:
+
+	site  test test
+	include comp.source*
+	exclude *misc*
+	list
+	newsgroups comp.protocol*
+	quit
+
+
+After you've had a bit of a play, have a read of the manpage to
+learn about the mail headers file and such.
+
+
+Integration with your news system.
+----------------------------------
+
+If you've got this far, then the next question is how to get the
+site's group files integrated back into your news systems. The short
+answer is that you need to write yourself a shell script to do this.
+
+To get you started, there is a sample for inn in scripts/gupdate. It
+does nothing smart really. All it does is concatenate a global header
+with each sites local header, groups and trailer, then a glocal
+trailer into a tentative newsfeeds file. The only slight trick is to
+use sed to make it amenable to inn's format.
+
+We actually use this script ourselves, it is run once a night from
+cron.
+
+======================================================================

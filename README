@@ -1,0 +1,59 @@
+Gup, the Group Update Program is a Unix mail-server that lets a remote
+site change their newsgroups subscription without requiring the
+intervention of the news administrator at the feed site.
+
+Gup is suited to news administrators that find they are spending an
+inordinate amount of time editing the INN newsfeeds file (or the
+C-News sys file) on behalf of the remote sites.
+
+Once installed, the news administrator at the remote sites simply
+mails commands to gup to make changes to their own site's subscription
+list.  Not only is no intervention required at the feed site, but gup
+checks the requests for valid newsgroup names, patterns that have no
+effect and so on, giving the requester precise information about the
+effect of their subscription.
+
+Each site has to be configured with gup before they can gain access.
+Configuration information includes a password and the administrator's
+mail ID as the results of any gup requests are mailed back to the
+configured administrator.
+
+Gup has no knowledge of any particular news system. Instead it
+maintains individual files for each site. A separate shell script is
+used to construct the *real* subscription file (we have provided a
+sample script for INN). The advantage of this strategy is that gup can
+be used with any news system, B-News, C-News, INN or whatever.
+
+
+Gup is definitely experimental software. While it has been used for a
+short while at two of the main newsfeed sites within .apana.org.au
+with some success, it is by no means perfect or complete. The purpose
+of posting to alt.sources is to give it more widespread use and get
+some feedback in terms of development directions.
+
+The other reason for posting here is to find out just how non-portable
+gup is. We admit we haven't tried very hard in this area yet. In fact
+gup is only known to run on SunOS and NetBSD - sorry. Having said that
+the frame-work is in place for portability considerations and given
+the minimal amount of system interaction, gup should be able to
+compile and run on most decent Unix systems with minimal work.
+
+
+So, give it a blast and tell us what you think.
+
+
+Mark Delany <markd@bushwire.apana.org.au>
+Andrew Herbert <andrew@werple.apana.org.au>
+
+
+Acknowledgements
+----------------
+
+Thanks to the APANA crowd for being the guinea-pigs that got to use
+Gup first and have the priviledge of finding a few bugs for us.
+
+We snarfled wildmat.c from the INN sources and the rfc822.* parsing
+routines from the newsgate sources. Thanks to Rich Salz
+<rsalz@osf.org> who write both of these packages.
+
+--------------------

@@ -1,0 +1,4 @@
+The program is not enabled by default.
+It will start updating /etc/news/newsfeeds and accepting commands
+only after the creation of /etc/news/newsfeeds.header.
+

@@ -1,0 +1,6 @@
+26 Jul 93	Posted to alt.sources
+26 Jul 93	Started PL1
+26 Jul 93	\n needed on output of the Delete command - oops
+05 Aug 93	Started 0.4
+		Added sort prior to list and prune/write
+		Minor change to printing of commands when in error
