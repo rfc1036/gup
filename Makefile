@@ -4,6 +4,7 @@
 
 CC = cc
 P_CFLAGS	= -g -O2 -Wall
+P_LIBS		= -lcrypt
 
 # Destination directories for the executable and man page. Note that
 # the executable is only used in a .forward so /usr/local/bin may

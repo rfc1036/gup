@@ -8,7 +8,6 @@
 #define QUESTIONABLE(c) \
 	((c) == '"' || (c) == '(' || (c) == ')' || (c) == '\\')
 
-
 /*
  *  Crack an RFC822 from header field into address and fullname.  We do
  *  this to make sure we write things out in official form.  "Be liberal
@@ -117,10 +116,10 @@ int CrackFrom(ADDRCHAR *addr, char *name, char *p)
 
     *adp++ = '\0';
 
-    if (addrfound) {
+    if (addrfound)
 	for (ap = name, xp = addrbuf; (*ap++ = (*xp & UNQUOTE_MASK)) != 0; xp++)
 	    continue;
-    } else {
+    else {
 	for (cp = addr, xp = addrbuf; (*cp++ = *xp) != 0; xp++)
 	    continue;
 	*name = '\0';

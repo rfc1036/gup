@@ -60,6 +60,6 @@ int help(const char **tokens)
     const char **hp;
 
     for (hp = hlist; *hp; hp++)
-	logit(L_MAIL, "", *hp);
+	logit(L_MAIL, *hp);
     return 0;
 }

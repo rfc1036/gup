@@ -1,3 +1,38 @@
+gup (0.5.8) unstable; urgency=low
+
+  * Added all conffiles (Closes: #132206).
+
+ -- Marco d'Itri <md@linux.it>  Sun, 17 Feb 2002 02:00:54 +0100
+
+gup (0.5.7) unstable; urgency=low
+
+  * Included <stdarg.h> (Closes: #87028).
+
+ -- Marco d'Itri <md@linux.it>  Sun, 25 Feb 2001 10:28:44 +0100
+
+gup (0.5.6) unstable; urgency=low
+
+  * Fixed postinst (Closes: #78103, #83377).
+
+ -- Marco d'Itri <md@linux.it>  Thu, 15 Feb 2001 12:25:11 +0100
+
+gup (0.5.5) unstable; urgency=low
+
+  * Fixed -m option (Closes: #69111).
+
+ -- Marco d'Itri <md@linux.it>  Mon, 14 Aug 2000 19:04:21 +0200
+
+gup (0.5.4) unstable; urgency=low
+
+  * Integrated westfalen.de changes from Kai Henningsen <kai@debian.org>:
+    + crypted passwords support
+    + -G maxgroups switch
+    + corrected group counting (Closes: #68773)
+  * Removed unused log_filename() variable.
+  * Simplified logging code and removed the static buffer buf[].
+
+ -- Marco d'Itri <md@linux.it>  Tue,  8 Aug 2000 22:29:41 +0200
+
 gup (0.5.3) frozen unstable; urgency=low
 
   * Fixed the description in debian/control (Closes #52886).

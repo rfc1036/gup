@@ -13,14 +13,14 @@
 
 #include "gup.h"
 
-
 /* Remove all superfluous groups */
-
 void prune(LIST *active_l, LIST *group_l)
 {
     GROUP *gp;
     GROUP *ap;
+    int groupcount;
 
+    groupcount = 0;
     /* tag the active list */
     TRAVERSE(active_l, ap) {
 	ap->u.tag = NULL;
@@ -29,7 +29,7 @@ void prune(LIST *active_l, LIST *group_l)
 	    if (wildmat(ap->name, gp->name)) {
 		TAG *t = (TAG *) malloc(sizeof(TAG));
 		if (!t) {
-		    logit(L_BOTH, "WARNING", "insufficient memory to prune!");
+		    logit(L_BOTH, "WARNING: insufficient memory to prune!");
 		    return;
 		}
 		/* add the group to the front of this ap's tag list */
@@ -38,7 +38,15 @@ void prune(LIST *active_l, LIST *group_l)
 		ap->u.tag = t;
 	    }
 	}
+	if (ap && ap->u.tag && ap->u.tag->group)
+	    if (! ap->u.tag->group->u.not)
+		groupcount++;
     }
+
+    /* see if too many groups in the list */
+    if (groupcount > maxgroups)
+	gupout(1, "Too many groups (%d, only %d allowed)",
+		groupcount, maxgroups);
 
     /* iterate the groups list to see if each group any effect on the active */
     TRAVERSE(group_l, gp) {
@@ -83,9 +91,8 @@ void prune(LIST *active_l, LIST *group_l)
 
 	    remove_group(group_l, gp);
 
-	    sprintf(msg, "%s %s subsumed",
+	    logit(L_BOTH, "PRUNED: %s %s subsumed",
 		    gp->u.not ? "exclude" : "include", gp->name);
-	    logit(L_BOTH, "PRUNED", msg);
 	}
     }
 }

@@ -1,13 +1,13 @@
 #!/bin/sh -e
 # This script create the data files for a new site
 
-d=/var/lib/gup
+gup=/var/lib/gup
 
-# the username that gup runs as
-gup_uid=gup
+# the username and group name that gup runs as
+gup_uid=gup:news
 
 if [ -z "$1" ]; then
-  echo "Usage: gup: newsite [header [trailer]]"
+  echo "Usage: gup: addsite [header [trailer]]"
   exit 1
 fi
 
@@ -15,14 +15,14 @@ h=$1
 header=$2
 trailer=$3
 
-cd $d/sites
+cd $gup/sites
 mkdir $h
 
 if [ -n "$header" ]; then
-  ln -s $d/headers/$header $h/header
+  ln -s $gup/headers/$header $h/header
 fi
 if [ -n "$trailer" ]; then
-  ln -s $d/trailers/$trailer $h/trailer
+  ln -s $gup/trailers/$trailer $h/trailer
 fi
 chown -R $gup_uid $h
 

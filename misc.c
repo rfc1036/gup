@@ -1,12 +1,10 @@
 #include "gup.h"
 
-
 /*
  * Read the group file into memory.  This routine serves a dual purpose
  * of reading the active file too!  An exclusion list can be specified
  * when reading the active file...
  */
-
 LIST *read_groups(int fd, LIST *exclusion_list)
 {
     LIST *list;
@@ -29,17 +27,15 @@ LIST *read_groups(int fd, LIST *exclusion_list)
 	lbuf[strlen(lbuf) - 1] = '\0';	/* Zip trailing \n */
 
 	/* Ignore leading and trailing spaces */
-	for (name = lbuf; *name; name++) {
+	for (name = lbuf; *name; name++)
 	    if (!isspace(*name))
 		break;
-	}
 
-	for (cp = name; *cp; cp++) {
+	for (cp = name; *cp; cp++)
 	    if (isspace(*cp)) {
 		*cp++ = '\0';
 		break;
 	    }
-	}
 
 	not = (*name == '!');
 	if (not)
@@ -59,10 +55,8 @@ LIST *read_groups(int fd, LIST *exclusion_list)
     }
 #else
     if (fstat(fd, &sb) < 0) {
-	char buf[128];
-
-	sprintf(buf, "read_groups: could not stat file (%s)", strerror(errno));
-	logit(L_BOTH, "ERROR", buf);
+	logit(L_BOTH, "ERROR: read_groups: could not stat file (%s)",
+		strerror(errno));
 	return list;
     }
     /* grab ourselves a buffer */
@@ -92,13 +86,11 @@ LIST *read_groups(int fd, LIST *exclusion_list)
 	if ((eoln = strchr(name, '\n')))
 	    *eoln = 0;
 	else
-	    logit(L_LOG, "WARNING", "premature end of groups file");
+	    logit(L_LOG, "WARNING: premature end of groups file");
 
 	/* locate end of group name */
-	if ((p = strchr(name, ' '))) {
-	    /* found it */
-	    *p = 0;
-	}
+	if ((p = strchr(name, ' ')))
+	    *p = 0;			/* found it */
 	if ((not = (*name == '!')))
 	    name++;
 
@@ -121,9 +113,7 @@ LIST *read_groups(int fd, LIST *exclusion_list)
     return list;
 }
 
-
 /* Check to see if a specific group is in the subscribed list */
-
 int subscribed(LIST *sub_list, const char *gname)
 {
     int unsub = TRUE;
@@ -135,7 +125,6 @@ int subscribed(LIST *sub_list, const char *gname)
     }
     return !unsub;
 }
-
 
 LIST *create_list(void)
 {
@@ -149,7 +138,6 @@ LIST *create_list(void)
     return l;
 }
 
-
 void add_group(LIST *list, GROUP *group)
 {
     if (!list->head)
@@ -161,7 +149,6 @@ void add_group(LIST *list, GROUP *group)
     list->length++;
     group->next = NULL;
 }
-
 
 void remove_group(LIST *list, GROUP *group)
 {
@@ -175,7 +162,7 @@ void remove_group(LIST *list, GROUP *group)
     }
 
     if (!tmp) {
-	logit(L_BOTH, "ERROR", "remove_group can't find group");
+	logit(L_BOTH, "ERROR: remove_group can't find group");
 	return;
     }
     /* unlink */
@@ -196,7 +183,6 @@ void remove_group(LIST *list, GROUP *group)
        a free-list for reclamation */
 }
 
-
 extern GROUP *create_group(int not_flag, const char *name)
 {
     GROUP *gp;
@@ -213,21 +199,17 @@ extern GROUP *create_group(int not_flag, const char *name)
     return gp;
 }
 
-
 void destroy_group(GROUP *gp)
 {
     free(gp);
 }
-
 
 char *xstrdup(const char *str)
 {
     char *res;
 
     res = malloc(strlen(str) + 1);
-    if (!res) {
-	sprintf(msg, "xstrdup of %d failed", strlen(str));
-	gupout(1, msg);
-    }
+    if (!res)
+	gupout(1, "xstrdup of %d failed", strlen(str));
     return strcpy(res, str);
 }

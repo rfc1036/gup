@@ -5,12 +5,10 @@
 
 #include "gup.h"
 
-
-FILE *mail_open(int open_now, const char *to, const char *command, const char *headers)
+FILE *mail_open(int open_now, const char *to, const char *command,
+	const char *headers)
 {
     FILE *fp;
-    FILE *hdr_fp;
-    char lbuf[MAX_LINE_SIZE];
 
     static char *m_to = NULL;
     static char *m_command = NULL;
@@ -42,41 +40,34 @@ FILE *mail_open(int open_now, const char *to, const char *command, const char *h
 	gupout(1, "Install error. No mail command supplied");
 
     fp = popen(m_command, "w");
-    if (!fp) {
-	sprintf(msg, "Could not open a pipe to '%s'", m_command);
-	gupout(1, msg);
-    }
-/*
- * Write order is: TO: , supplied headers file, blank line.
- *
- * Note that the headers are expected to contain reply-to, Subject and
- * such, but can be empty or non-existant for sendmail. Furthermore,
- * there is no reason why a preceding blab of text cannot go in there
- * too!
- */
+    if (!fp)
+	gupout(1, "Could not open a pipe to '%s'", m_command);
 
+    /* Write order is: TO: , supplied headers file, blank line.
+     * Note that the headers are expected to contain reply-to, Subject and
+     * such, but can be empty or non-existant for sendmail. Furthermore,
+     * there is no reason why a preceding blab of text cannot go in there too!
+     */
     if (m_to)
 	fprintf(fp, "To: %s\n", m_to);
 
     if (m_headers) {
-	if (!(hdr_fp = fopen(m_headers, "r"))) {
-	    while (fgets(lbuf, sizeof(lbuf), hdr_fp)) {
+	FILE *hdr_fp;
+	char lbuf[MAX_LINE_SIZE];
+
+	if ((hdr_fp = fopen(m_headers, "r"))) {
+	    while (fgets(lbuf, sizeof(lbuf), hdr_fp))
 		fputs(lbuf, fp);
-	    }
 	    fclose(hdr_fp);
-	} else {
-	    sprintf(msg, "Could not open '%s' (%s)", m_headers,
-		    strerror(errno));
-	    logit(L_LOG, "WARNING", msg);
-	}
+	} else
+	    logit(L_LOG, "WARNING: Could not open '%s' (%s)",
+		    m_headers, strerror(errno));
     } else			/* Add a default header */
 	fputs("Subject: Results of your request\n", fp);
 
     fputs("\n\n", fp);		/* End of headers for certain */
-
     return fp;
 }
-
 
 extern void mail_close(FILE *fp)
 {

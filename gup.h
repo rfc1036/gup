@@ -1,10 +1,18 @@
-#include <stdio.h>
+#ifdef linux
+#define _GNU_SOURCE
+#else
+#define _XOPEN_SOURCE
+#define _BSD_SOURCE
+#endif
+
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <time.h>		/* strftime */
 #include <unistd.h>		/* Flock flags */
 #include <ctype.h>		/* isspace */
 #include <errno.h>		/* Needed for errno */
+#include <stdarg.h>
 
 #include <sys/file.h>
 #include <sys/stat.h>		/* umask */
@@ -12,7 +20,7 @@
 #include "config.h"
 
 
-#define	VERSION			"0.5"
+#define	VERSION			"0.5.7"
 
 
 #define	TRUE		1
@@ -23,16 +31,12 @@
 #define	MAX_LINE_SIZE		512
 #define	MODEST_SIZE		128
 
-#define FILE_LOCK		/* this should always be OK */
-/*but is not NFS safe! -- Md */
-
 #ifdef FILE_LOCK
-#define LOCK_SLEEP		10	/* time to sleep between lock attempts */
+#define LOCK_SLEEP		10	/* time to sleep between lock attempts*/
 #define MAX_LOCK_SLEEP_COUNT	10	/* maximum number of tries */
 #endif
 
 /* Logit flags */
-
 #define	L_LOG		(1<<0)
 #define	L_MAIL		(1<<1)
 #define	L_BOTH		(L_LOG | L_MAIL)
@@ -75,42 +79,44 @@ typedef struct {
 #define LIST_LENGTH(list) \
 	(list->length)
 
-/* Protos */
+#ifdef __GNUC__
+#define __NORETURN __attribute__((__noreturn__))
+#else
+#define __NORETURN
+#endif
 
-extern int wildmat(const char *text, const char *p);
-extern void logit(int lflags, const char *prefix, const char *msg);
+/* Protos */
+extern int wildmat(const char *, const char *);
+extern void logit(int, const char *, ...);
+extern void vlogit(int, const char *, const char *, va_list AP);
+extern void __NORETURN gupout(int, const char *, ...);
+extern void prune(LIST *, LIST *);
+extern int help(const char **);
+extern void print_newsgroups(FILE *, const char *);
+
+/* lock.c */
 extern int lockit(void);
 extern void unlockit(void);
-extern void gupout(int val, const char *msg)
-#ifdef __GNUC__
- __attribute__((__noreturn__))
-#endif
-;
-extern void prune(LIST * active_list, LIST * group_list);
-extern int help(const char **tokens);
-extern void print_newsgroups(FILE *, const char *gname);
-extern LIST *read_groups(int fd, LIST * exclusion_list);
-extern LIST *create_list(void);
-extern GROUP *create_group(int not_flag, const char *name);
-extern void destroy_group(GROUP * gp);
-extern void add_group(LIST * list, GROUP * group);
-extern void remove_group(LIST * list, GROUP * group);
 
-extern char *xstrdup(const char *str);
-extern int subscribed(LIST * gp, const char *gname);
+/* misc.c */
+extern LIST *read_groups(int, LIST *);
+extern int subscribed(LIST *, const char *);
+extern LIST *create_list(void);
+extern void add_group(LIST *, GROUP *);
+extern void remove_group(LIST *, GROUP *);
+extern GROUP *create_group(int, const char *);
+extern void destroy_group(GROUP *);
+extern char *xstrdup(const char *);
 
 /* mail.c */
-
 extern FILE *mail_open(int, const char *, const char *, const char *);
 extern void mail_close(FILE *);
 
 /* sort.c */
-
-extern LIST *sort_groups(LIST * list);
+extern LIST *sort_groups(LIST *);
 
 /* Define external variables */
-
-#ifdef	MAIN
+#ifdef MAIN
 #define	EXTERN
 #else
 #define	EXTERN	extern
@@ -118,15 +124,14 @@ extern LIST *sort_groups(LIST * list);
 
 extern const char *progname;
 
-EXTERN const char *log_filename;
 EXTERN FILE *log_fp;
-
 EXTERN FILE *mail_fp;
 
 EXTERN const char *active_path;
 EXTERN const char *newsgroups_path;
 
-EXTERN char msg[MAX_LINE_SIZE * 2];
-
 EXTERN LIST *active_list;
 EXTERN LIST *group_list;
+
+EXTERN int maxgroups;
+

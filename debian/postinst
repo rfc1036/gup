@@ -5,20 +5,20 @@ if ! id gup >/dev/null 2>&1; then
     --disabled-password --gecos "Group Update Program" gup
 fi
 
-if [ ! -d /var/lib/gup/ ]; then
+if [ ! -d /var/lib/gup/default ]; then
   cd /var/lib/gup/
   echo '| /usr/lib/gup/process' > .forward
   ln -s /etc/gup.conf config
-  mkdir default
+  mkdir default sites
   echo -e 'HOST\\\n  :!*,\\' > default/header
   echo -e '  :Tf,Wfb,B4096/1024:' > default/trailer
   ln -s /etc/news/newsfeeds.header default/global.header
-  chown -R gup. .
+  chown -R gup:news .
 fi
 
 if [ ! -f /etc/gup.conf ]; then
   echo -e '#site\tpassword\tuser@example.com' > /etc/gup.conf
-  chown gup. /etc/gup.conf
+  chown gup:news /etc/gup.conf
   chmod 700 /etc/gup.conf
 fi
 

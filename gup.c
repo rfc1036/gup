@@ -42,7 +42,7 @@ static const char *usage =
 "\n\
 Usage: %s\t[-hvP] -a active_path [-d home_directory] [-l log_path]\n\
 \t\t[-m reply_headers] [-n newsgroups_path] [-s sites_directory]\n\
-[-M Mail_command]\n\
+[-M Mail_command] [-G maxgroups]\n\
 \n\
 Group Update Program: mail-server for remote newfeed changes.\n\
 \n\
@@ -56,6 +56,7 @@ Group Update Program: mail-server for remote newfeed changes.\n\
 -P\tDo not prune newsgroup selections (prune is CP intensive)\n\
 -s\tLocation of the site directories (default: ./sites)\n\
 -v\tPrint version and build options, then exit.\n\
+-G\tMaximum number of subscriptions allowed\n\
 \n";
 
 
@@ -93,7 +94,6 @@ static int newsgroups(const char **tokens);
 
 
 /* Here's the command list from the body of the mail */
-
 static COMMAND C_list[] =
 {
     {"inc*lude", include, 2, TRUE, FALSE},
@@ -125,7 +125,6 @@ static char curr_line[MAX_LINE_SIZE];
 static int quit_flag;
 
 /* Variables used to control mailed results */
-
 static char *h_from = NULL;
 static char *h_reply_to = NULL;
 static char *h_date = NULL;
@@ -168,121 +167,101 @@ int main(int argc, char **argv)
     if (changed) {		/* Only sort & prune if changed */
 	group_list = sort_groups(group_list);
 	if (do_prune) {
-	    putc('\n', mail_fp);
-	    logit(L_BOTH | L_TIMESTAMP, "", "Checking new group list");
+	    logit(L_MAIL, "");
+	    logit(L_BOTH | L_TIMESTAMP, "Checking new group list");
 	    prune(active_list, group_list);
 	}
-	logit(L_BOTH | L_TIMESTAMP, "", "Writing updated group list");
+	logit(L_BOTH | L_TIMESTAMP, "Writing updated group list");
 	write_groups();
     }
-    gupout(0, (char *) NULL);
-
+    gupout(0, NULL);
     /* NOTREACHED */
 }
 
-
 /* Parse the command line options */
-
 static void parse_options(int argc, char **argv)
 {
     int cc;
 
-    log_filename = NULL;
     active_path = ACTIVE_PATH;
     newsgroups_path = NEWSGROUPS_PATH;
-    mail_fp = mail_open(FALSE, BACKSTOP_MAILID, MAIL_COMMAND, (char *) NULL);
+    mail_fp = mail_open(FALSE, BACKSTOP_MAILID, MAIL_COMMAND, NULL);
+    maxgroups = 32767;
 
-    while ((cc = getopt(argc, argv, "a:d:hs:l:n:m:M:Pv")) != EOF) {
+    while ((cc = getopt(argc, argv, "a:d:hs:l:n:m:M:PvG:")) != -1) {
 	switch (cc) {
 	case 'a':
 	    active_path = optarg;
 	    break;
 	case 'd':
-	    if (optarg) {
-		if (chdir(optarg)) {
-		    sprintf(msg, "Could not chdir to %s", optarg);
-		    gupout(1, msg);
-		}
-	    }
+	    if (optarg)
+		if (chdir(optarg))
+		    gupout(1, "Could not chdir to %s", optarg);
 	    break;
-
 	case 'h':
 	    fprintf(stderr, usage, progname);
 	    exit(0);
-
 	case 's':
 	    site_directory = optarg;
 	    break;
 	case 'l':
 	    if (optarg) {
-		if (!(log_fp = fopen(optarg, "a"))) {
-		    sprintf(msg, "%s: Could not open log file: %s\n",
-			    progname, log_filename);
-		    gupout(1, msg);
-		}
+		if (!(log_fp = fopen(optarg, "a")))
+		    gupout(1, "%s: Could not open log file: %s\n",
+			    progname, optarg);
 		if (dup2(fileno(log_fp), fileno(stderr)) < 0)
 		    gupout(1, "dup2() failed");
 	    }
 	    break;
-
 	case 'm':
-	    mail_fp = mail_open(FALSE, (char *) NULL,
-				(char *) NULL, optarg);
+	    mail_fp = mail_open(FALSE, NULL, NULL, optarg);
 	    break;
-
 	case 'M':
-	    mail_fp = mail_open(FALSE, (char *) NULL,
-				optarg, (char *) NULL);
+	    mail_fp = mail_open(FALSE, NULL, optarg, NULL);
 	    break;
-
 	case 'P':
 	    do_prune = FALSE;
 	    break;
-
 	case 'n':
 	    newsgroups_path = optarg;
 	    break;
-
 	case 'v':
 	    print_version();
 	    exit(0);
-
+	case 'G':
+	    maxgroups = atoi(optarg);
+	    break;
 	default:
 	    gupout(1, "Installation problem. Invalid option used");
 	}
     }
 
-/* Must have an active file that can be opened */
 
+    /* Must have an active file that can be opened */
     if (!active_path || !*active_path) {
 	fprintf(stderr, "%s: Must nominate the active file with -a\n",
 		progname);
 	fprintf(stderr, usage, progname);
-	gupout(1, (char *) NULL);
+	gupout(1, NULL);
     }
 }
 
 static void print_version(void)
 {
     fprintf(stderr, "%s: Version: %s.\n", progname, VERSION);
-
-/*
-   fprintf(stderr, "CONFIG:           '%s'\n", CONFIG);
- */
+    fprintf(stderr, "CONFIG_FILENAME:  '%s'\n", CONFIG_FILENAME);
     fprintf(stderr, "ACTIVE_PATH:      '%s'\n", ACTIVE_PATH);
     fprintf(stderr, "NEWSGROUPS_PATH:  '%s'\n", NEWSGROUPS_PATH);
     fprintf(stderr, "MAIL_COMMAND:     '%s'\n", MAIL_COMMAND);
     fprintf(stderr, "BACKSTOP_MAILID:  '%s'\n", BACKSTOP_MAILID);
     fprintf(stderr, "UMASK:            %03o\n", UMASK);
-
-#ifndef	NO_FLOCK
-    fprintf(stderr, "LOCKING uses:     FLOCK\n");
+#ifdef USE_FLOCK
+    fprintf(stderr, "LOCKING uses:     flock(2)\n");
 #endif
-#ifdef	FILE_LOCK
-    fprintf(stderr, "LOCKING uses:     FILE_LOCK\n");
+#ifdef USE_DOTLOCK
+    fprintf(stderr, "LOCKING uses:     dot locking\n");
 #endif
 }
-
 
 /*
  * Parse the mail headers and note the interesting ones. Note that we
@@ -291,7 +270,6 @@ static void print_version(void)
  * early on in the process that our mailid is bound to be the backstop
  * mailid.
  */
-
 static void parse_headers(void)
 {
     while (getoneline(stdin)) {
@@ -303,10 +281,8 @@ static void parse_headers(void)
 
 	    CrackFrom(buf1, buf2, curr_line + 5);
 	    h_from = xstrdup(buf1);
-	    if (!h_reply_to) {
-		mail_fp = mail_open(FALSE, h_from,
-				    (char *) NULL, (char *) NULL);
-	    }
+	    if (!h_reply_to)
+		mail_fp = mail_open(FALSE, h_from, NULL, NULL);
 	    continue;
 	}
 	if (strncasecmp(curr_line, "REPLY-TO:", 9) == 0) {
@@ -314,8 +290,7 @@ static void parse_headers(void)
 
 	    CrackFrom(buf1, buf2, curr_line + 9);
 	    h_reply_to = xstrdup(buf1);
-	    mail_fp = mail_open(FALSE, h_reply_to,
-				(char *) NULL, (char *) NULL);
+	    mail_fp = mail_open(FALSE, h_reply_to, NULL, NULL);
 	    continue;
 	}
 	if (strncasecmp(curr_line, "DATE:", 5) == 0) {
@@ -355,8 +330,8 @@ static int parse_commands(void)
 	    continue;
 
 	if (seen_site) {
-	    logit(L_MAIL, "", "");
-	    logit(L_BOTH, "", curr_line);
+	    logit(L_MAIL, "");
+	    logit(L_BOTH, "%s", curr_line);
 	}
 	tcount = tokenize(curr_line, tokens, 10);
 	if (tcount == 0)
@@ -364,39 +339,28 @@ static int parse_commands(void)
 
 	/* Search for a matching command */
 	command = tokens[0];
-	for (cmdp = C_list; cmdp->name; cmdp++) {
+	for (cmdp = C_list; cmdp->name; cmdp++)
 	    if (command_cmp(command, cmdp->name) == 0)
 		break;
-	}
 
 	/* Find it? */
 	if (!cmdp->name) {	/* No */
-	    if (!seen_site) {	/* What a hack - sigh */
-		sprintf(msg, "%s %s %s", tokens[0], tokens[1], tokens[2]);
-		logit(L_BOTH, "", "");
-		logit(L_BOTH, "", msg);
-	    }
-	    logit(L_BOTH, "", "");
-	    sprintf(msg, "Unrecognized command '%s' - try 'help'", command);
-	    logit(L_BOTH, "ERROR", msg);
-	    logit(L_BOTH, "NOTE", "No changes made to subscription list.");
-	    gupout(0, (char *) NULL);
+	    if (!seen_site)	/* What a hack - sigh */
+		logit(L_BOTH, "\n%s %s %s", tokens[0],tokens[1],tokens[2]);
+	    logit(L_BOTH, "\nERROR: Unrecognized command '%s' - try 'help'\n"
+		    "NOTE: No changes made to subscription list.", command);
+	    gupout(0, NULL);
 	}
 
 	/* Does this command require a preceeding site command? */
-	if (cmdp->needs_site) {
-	    if (!seen_site) {
-		sprintf(msg, "'site' command must preceed the '%s' command",
-			cmdp->name);
-		gupout(0, msg);
-	    }
-	}
+	if (cmdp->needs_site && !seen_site)
+	    gupout(0, "'site' command must preceed the '%s' command",
+		    cmdp->name);
 
 	/* Only check # of args if defined as > 0 */
 	if ((cmdp->args > 0) && (tcount != cmdp->args)) {
-	    sprintf(msg, "%s requires %d parameters, not %d\n",
+	    logit(L_BOTH, "WARNING: %s requires %d parameters, not %d\n",
 		    command, cmdp->args, tcount);
-	    logit(L_BOTH, "WARNING", msg);
 	    continue;
 	}
 
@@ -412,10 +376,7 @@ static int parse_commands(void)
     return changed;
 }
 
-
-
 /*      site    sitename        passwd */
-
 static int site(const char **tokens)
 {
     FILE *fp;
@@ -425,15 +386,14 @@ static int site(const char **tokens)
     int tcount;
     LIST *exclusion_list = NULL;
     char lbuf[MAX_LINE_SIZE];
+    char *cryptstr;
 
     if (seen_site)
 	gupout(0, "Multiple 'site' commands not allowed");
 
     /* Search the config file for a valid sitename */
-    if (!(fp = fopen(CONFIG_FILENAME, "r"))) {
-	sprintf(msg, "Install error. Open of '%s' failed", CONFIG_FILENAME);
-	gupout(1, msg);
-    }
+    if (!(fp = fopen(CONFIG_FILENAME, "r")))
+	gupout(1, "Install error. Open of '%s' failed", CONFIG_FILENAME);
 
     /* Search for matching site */
     found_site = FALSE;
@@ -443,11 +403,9 @@ static int site(const char **tokens)
 	    continue;
 	if (*hf_tokens[0] == '#')
 	    continue;		/* skip comments -- Md */
-	if (tcount != 3) {
-	    sprintf(msg, "%s format incorrect for %s. Need 3 tokens",
+	if (tcount != 3)
+	    gupout(1, "%s format incorrect for %s. Need 3 tokens",
 		    CONFIG_FILENAME, tokens[0]);
-	    gupout(1, msg);
-	}
 	if (strcasecmp(tokens[0], hf_tokens[0]) == 0) {
 	    found_site = TRUE;
 	    break;
@@ -456,78 +414,62 @@ static int site(const char **tokens)
 
     fclose(fp);
 
-    if (!found_site) {
-	sprintf(msg, "Unknown site '%s'", tokens[0]);
-	gupout(0, msg);
-    }
+    if (!found_site)
+	gupout(0, "Unknown site '%s'", tokens[0]);
+
 /*
  * Ok. We now have the *correct* admin mail ID. Start the mail output.
  * We set up even before completing the site command so that password
  * cracking attempts go to the site admin, not the sender.
  */
-
-    mail_fp = mail_open(TRUE, hf_tokens[2], (char *) NULL, (char *) NULL);
+    mail_fp = mail_open(TRUE, hf_tokens[2], NULL, NULL);
 
 /*
  * Right.  Now mail_fp is guaranteed to be open, and stdout points there as
  * well.  Let's catch up on all that good log stuff we want to tell them.
  */
-
-    logit(L_LOG, "", "");
-    sprintf(msg, "%s %s", progname, VERSION);
-    logit(L_BOTH | L_TIMESTAMP, "BEGIN", msg);
-    logit(L_BOTH, "", "");
+    logit(L_LOG, "");
+    logit(L_BOTH | L_TIMESTAMP, "BEGIN: %s %s\n", progname, VERSION);
 
     log_mail_headers();
 
-    sprintf(msg, "site %s", tokens[0]);
-    logit(L_BOTH, "", msg);
+    logit(L_BOTH, "site %s", tokens[0]);
 
     /* Found the site how does the password look? */
-    if (strcmp(tokens[1], hf_tokens[1]) != 0)
+    cryptstr = crypt(tokens[1], hf_tokens[1]);
+
+    if (strcmp(cryptstr, hf_tokens[1]) != 0		/* crypted pwd */
+#ifdef CLEARTEXT_PWD
+	&& strcmp(tokens[1], hf_tokens[1]) != 0)	/* cleartext pwd */
+#endif
 	gupout(0, "Password incorrect");
 
     sitename = xstrdup(hf_tokens[0]);
     seen_site = TRUE;
 
     /* It's all good, accept this site as the directory name and cd to it */
-    while (chdir(site_directory)) {
+    while (chdir(site_directory))
 	if (errno == ENOENT) {
-	    logit(L_LOG, "MKDIR", site_directory);
-	    if (mkdir(site_directory, 0777)) {
-		sprintf(msg,
-		"Install error: could not MKDIR %s (%s)", site_directory,
-			strerror(errno));
-		gupout(1, msg);
-	    }
-	} else {
-	    sprintf(msg,
-	     "Install error: could not CHDIR to %s (%s)", site_directory,
-		    strerror(errno));
-	    gupout(1, msg);
-	}
-    }
+	    logit(L_LOG, "MKDIR: %s", site_directory);
+	    if (mkdir(site_directory, 0777))
+		gupout(1, "Install error: could not MKDIR %s (%s)",
+			site_directory, strerror(errno));
+	} else
+	    gupout(1, "Install error: could not CHDIR to %s (%s)",
+		    site_directory, strerror(errno));
 
-    while (chdir(sitename)) {
+    while (chdir(sitename))
 	if (errno == ENOENT) {
-	    logit(L_LOG, "MKDIR", sitename);
-	    if (mkdir(sitename, 0777)) {
-		sprintf(msg,
-		      "Install error: could not MKDIR %s (%s)", sitename,
-			strerror(errno));
-		gupout(1, msg);
-	    }
-	} else {
-	    sprintf(msg, "Install error: could not CHDIR to %s (%s)", sitename,
-		    strerror(errno));
-	    gupout(1, msg);
-	}
-    }
+	    logit(L_LOG, "MKDIR: %s", sitename);
+	    if (mkdir(sitename, 0777))
+		gupout(1, "Install error: could not MKDIR %s (%s)",
+			sitename, strerror(errno));
+	} else
+	    gupout(1, "Install error: could not CHDIR to %s (%s)",
+		    sitename, strerror(errno));
 
-    if (!lockit()) {
-	sprintf(msg, "Failed to take lock in %s", lbuf);
-	gupout(1, msg);
-    }
+    if (!lockit())
+	gupout(1, "Failed to take lock in %s", lbuf);
     if ((fd = open(EXCLUSIONS_FILENAME, O_RDONLY)) >= 0) {
 	exclusion_list = read_groups(fd, (LIST *) NULL);
 	close(fd);
@@ -540,54 +482,43 @@ static int site(const char **tokens)
 	close(fd);
     } else {
 	group_list = create_list();	/* we need something... */
-	sprintf(msg, "File '%s' not found for %s", BODY_FILENAME, sitename);
-	logit(L_LOG, "WARNING", msg);
+	logit(L_LOG, "WARNING: File '%s' not found for %s", BODY_FILENAME,
+		sitename);
     }
 
     return FALSE;
 }
-
 
 static int quit(const char **tokens)
 {
     return 0;
 }
 
-
 /* Check and load the active file */
-
 static void load_active(LIST *exclusion_list)
 {
     int fd;
 
-    if ((fd = open(active_path, O_RDONLY)) < 0) {
-	sprintf(msg, "Could not open active file '%s'", active_path);
-	gupout(1, msg);
-    }
+    if ((fd = open(active_path, O_RDONLY)) < 0)
+	gupout(1, "Could not open active file '%s'", active_path);
     active_list = read_groups(fd, exclusion_list);
     close(fd);
 
-    if (!active_list->length) {
-	sprintf(msg, "No groups found in active file '%s'", active_path);
-	gupout(1, msg);
-    }
+    if (!active_list->length)
+	gupout(1, "No groups found in active file '%s'", active_path);
 }
-
 
 /*
  * Writes the new group list back to disk moderately safely.
  */
-
 static void write_groups(void)
 {
     FILE *fp;
     GROUP *gp;
     int write_count;
 
-    if (!(fp = fopen(NEWBODY_FILENAME, "w"))) {
-	sprintf(msg, "Could not open %s for writing", NEWBODY_FILENAME);
-	gupout(1, msg);
-    }
+    if (!(fp = fopen(NEWBODY_FILENAME, "w")))
+	gupout(1, "Could not open %s for writing", NEWBODY_FILENAME);
     write_count = 0;
     TRAVERSE(group_list, gp) {
 	write_count++;
@@ -599,8 +530,8 @@ static void write_groups(void)
 
     fclose(fp);
 
-    sprintf(msg, "%s: group patterns: %d", sitename, write_count);
-    logit(L_BOTH | L_TIMESTAMP, progname, msg);
+    logit(L_BOTH | L_TIMESTAMP, "%s: %s: group patterns: %d",
+	    progname, sitename, write_count);
 
 /*
  * In the directory is:       groups, groups.new and groups.old
@@ -609,22 +540,15 @@ static void write_groups(void)
  * rename(new,groups)
  */
 
-    if ((rename(BODY_FILENAME, OLDBODY_FILENAME) == -1) && (errno != ENOENT)) {
-	sprintf(msg, "rename(%s,%s) failed for %s. Errno=%d",
+    if ((rename(BODY_FILENAME, OLDBODY_FILENAME) == -1) && (errno != ENOENT))
+	gupout(1, "rename(%s,%s) failed for %s. Errno=%d",
 		BODY_FILENAME, OLDBODY_FILENAME, sitename, errno);
-	gupout(1, msg);
-    }
-    if (rename(NEWBODY_FILENAME, BODY_FILENAME) == -1) {
-	sprintf(msg, "rename(%s,%s) failed for %s. Errno=%d",
+    if (rename(NEWBODY_FILENAME, BODY_FILENAME) == -1)
+	gupout(1, "rename(%s,%s) failed for %s. Errno=%d",
 		NEWBODY_FILENAME, BODY_FILENAME, sitename, errno);
-	gupout(1, msg);
-    }
 }
 
-
-
 /* Include a pattern into the site's group list */
-
 static int include(const char **tokens)
 {
     return insert_group(FALSE, tokens[0]);
@@ -662,14 +586,12 @@ static int insert_group(int not_flag, const char *gname)
 
     if (match_count == 0) {
 	destroy_group(new_gp);
-	sprintf(msg, "%s pattern not in active - ignored", gname);
-	logit(L_MAIL, "WARNING", msg);
+	logit(L_MAIL, "WARNING: %s pattern not in active - ignored", gname);
 	return FALSE;
     }
-    putc('\n', mail_fp);
-    if (match_count > 1) {
-	fprintf(mail_fp, "  [ %d groups ]\n", match_count);
-    }
+    logit(L_MAIL, "");
+    if (match_count > 1)
+	logit(L_MAIL, "  [ %d groups ]", match_count);
 
     /* Link the new add pattern into the end */
     add_group(group_list, new_gp);
@@ -677,9 +599,7 @@ static int insert_group(int not_flag, const char *gname)
     return TRUE;
 }
 
-
 /* Delete matches on the group list, not the active list */
-
 static int delete(const char **tokens)
 {
     const char *gname;
@@ -693,26 +613,21 @@ static int delete(const char **tokens)
     TRAVERSE(group_list, gp) {
 	if (wildmat(gp->name, gname)) {
 	    match_count++;
-	    if (match_count <= LOG_MATCH_LIMIT) {
-		fprintf(mail_fp, "\tMatches: %s %s\n",
+	    if (match_count <= LOG_MATCH_LIMIT)
+		logit(L_MAIL, "\tMatches: %s %s",
 			gp->u.not ? "exclude" : "include", gp->name);
-	    }
-	    if (match_count == LOG_MATCH_LIMIT) {
-		fputs("\tMatches: ...etc...\n", mail_fp);
-	    }
+	    if (match_count == LOG_MATCH_LIMIT)
+		logit(L_MAIL, "\tMatches: ...etc...");
 	    remove_group(group_list, gp);
 	}
     }
 
-    sprintf(msg, "Match count %d", match_count);
-    logit(L_BOTH, " delete", msg);
-    if (match_count == 0) {
-	sprintf(msg, "%s pattern not in %s - ignored", gname, BODY_FILENAME);
-	logit(L_MAIL, "WARNING", msg);
-    }
+    logit(L_BOTH, " delete: Match count %d", match_count);
+    if (match_count == 0)
+	logit(L_MAIL, "WARNING: %s pattern not in %s - ignored",
+		gname, BODY_FILENAME);
     return (match_count > 0);
 }
-
 
 static void item_print(int indent, int *column, const char *str)
 {
@@ -746,36 +661,30 @@ static void item_print(int indent, int *column, const char *str)
     *column += len + 2;
 }
 
-
 /* List out the currently selected groups */
-
 static int list(const char **tokens)
 {
     GROUP *gp;
 
     group_list = sort_groups(group_list);
     TRAVERSE(group_list, gp) {
-	fprintf(mail_fp, "  %s  %s\n", gp->u.not ? "  exclude" : "include",
+	logit(L_MAIL, "  %s  %s\n", gp->u.not ? "  exclude" : "include",
 		gp->name);
     }
     return 0;
 }
 
-
 /* List out the active file entries that match the pattern */
-
 static int newsgroups(const char **tokens)
 {
     print_newsgroups(mail_fp, tokens[0]);
     return 0;
 }
 
-
 /*
  * Read the next line into curr_line. Trim trailing whitespace.
  * Return TRUE if a line was read, otherwise return FALSE.
  */
-
 static int getoneline(FILE *fp)
 {
     int len;
@@ -795,24 +704,21 @@ static int getoneline(FILE *fp)
     return TRUE;
 }
 
-
 /*
  * A simple whitespace tokenizer - no continutation, no quotes, no
  * nuthin' Does accept comments '#' and empty lines.
  */
-
 static int tokenize(char *cp, const char **tokens, int max_tokens)
 {
     int tix;
     char *com_cp;
 
     /* Find comment */
-    for (com_cp = cp; *com_cp; com_cp++) {
+    for (com_cp = cp; *com_cp; com_cp++)
 	if (*com_cp == '#') {
 	    *com_cp = '\0';
 	    break;
 	}
-    }
 
     /* Why don't I use scanf? Good question... */
     for (tix = 0; tix < max_tokens; tix++)
@@ -835,7 +741,6 @@ static int tokenize(char *cp, const char **tokens, int max_tokens)
     return tix;
 }
 
-
 static int command_cmp(const char *str, const char *cmd)
 {
     int base = 0;		/* have we matched the base of the cmd? */
@@ -853,29 +758,31 @@ static int command_cmp(const char *str, const char *cmd)
     return !(!*str && (base || !*cmd));
 }
 
-
-
-void gupout(int val, const char *out_msg)
+void gupout(int val, const char *out_msg, ...)
 {
-    /* release our lock */
-    unlockit();
+    va_list ap;
 
-    if (out_msg)
-	logit(L_BOTH, "ERROR", out_msg);
+    unlockit();			/* release our lock */
+
+    if (out_msg) {
+	va_start(ap, out_msg);
+	vlogit(L_BOTH, "ERROR", out_msg, ap);
+	va_end(ap);
+    }
 
     log_mail_headers();
-    logit(L_BOTH, "", "");
-    logit(L_BOTH | L_TIMESTAMP, "END", progname);
+    logit(L_BOTH, "");
+    logit(L_BOTH | L_TIMESTAMP, "END: %s", progname);
 
     if (log_fp)
 	fclose(log_fp);
     if (mail_fp)
 	mail_close(mail_fp);
 
-/* exit(val) */
-/* keep the MTA happy - "don't worry, it's all under control  - honest!" */
+    /* keep the MTA happy - "don't worry, it's all under control  - honest!" */
+/*   exit(val) */
 
-    /* but only if it's not a system error */
+    /* but only if it's not a system error -- Md*/
     if (val > 0)
 	exit(75);		/* EX_TEMPFAIL */
     else
@@ -888,47 +795,46 @@ void gupout(int val, const char *out_msg)
  * if they haven't already been logged. I don't know that freeing is
  * doing anything much for anyone, but...
  */
-
 static void log_mail_headers(void)
 {
     int log_count = 0;
 
     if (h_from) {
-	logit(L_BOTH, "Mail Header: FROM", h_from);
+	logit(L_BOTH, "Mail Header: FROM: %s", h_from);
 	free(h_from);
 	h_from = NULL;
 	log_count++;
     }
     if (h_reply_to) {
-	logit(L_BOTH, "Mail Header: REPLY-TO", h_reply_to);
+	logit(L_BOTH, "Mail Header: REPLY-TO: %s", h_reply_to);
 	free(h_reply_to);
 	h_reply_to = NULL;
 	log_count++;
     }
     if (h_subject) {
-	logit(L_BOTH, "Mail Header", h_subject);
+	logit(L_BOTH, "Mail Header: %s", h_subject);
 	free(h_subject);
 	h_subject = NULL;
 	log_count++;
     }
     if (h_date) {
-	logit(L_BOTH, "Mail Header", h_date);
+	logit(L_BOTH, "Mail Header: %s", h_date);
 	free(h_date);
 	h_date = NULL;
 	log_count++;
     }
     if (h_message_id) {
-	logit(L_BOTH, "Mail Header", h_message_id);
+	logit(L_BOTH, "Mail Header: %s", h_message_id);
 	free(h_message_id);
 	h_message_id = NULL;
 	log_count++;
     }
     if (h_return_path) {
-	logit(L_BOTH, "Mail Header", h_return_path);
+	logit(L_BOTH, "Mail Header: %s", h_return_path);
 	free(h_return_path);
 	h_return_path = NULL;
 	log_count++;
     }
     if (log_count)
-	logit(L_BOTH, "", "");
+	logit(L_BOTH, "");
 }

@@ -1,13 +1,10 @@
 #include "gup.h"
 
-
 static int newsgroups_loaded = FALSE;
-
 
 static void load_newsgroups(void);
 
 /* List out the active file entries that match the pattern */
-
 extern void print_newsgroups(FILE *fp, const char *gname)
 {
     GROUP *gp;
@@ -19,8 +16,7 @@ extern void print_newsgroups(FILE *fp, const char *gname)
     if (!newsgroups_loaded)
 	load_newsgroups();
 
-/* Print all matching active entries */
-
+    /* Print all matching active entries */
     fprintf(fp, "\n%-*s Sub Description\n",
 	    GROUP_OVERFLOW_LP, "Name");
     fprintf(fp, "%-*s --- ----------------------------------------\n",
@@ -35,13 +31,12 @@ extern void print_newsgroups(FILE *fp, const char *gname)
 
 	    fputs(gp->name, fp);
 
-/*
- * Try and fit the description nicely on the current line.
- * Either:      groupname       DESC
- * or:          very-long-group-name
- *                              DESC
- */
-
+    /*
+     * Try and fit the description nicely on the current line.
+     * Either:      groupname       DESC
+     * or:          very-long-group-name
+     *                              DESC
+     */
 	    glen = strlen(gp->name);
 	    if (glen > GROUP_OVERFLOW_LP) {
 		glen = 0;
@@ -60,9 +55,7 @@ extern void print_newsgroups(FILE *fp, const char *gname)
 	    gcount, subcount);
 }
 
-
 /* Try and load the newsgroups file and add descriptions to the active */
-
 static void load_newsgroups(void)
 {
 #ifdef STDIO_LOADFILE
@@ -80,15 +73,14 @@ static void load_newsgroups(void)
 
     newsgroups_loaded = TRUE;
     if (!newsgroups_path || !*newsgroups_path) {
-	logit(L_BOTH, "WARNING",
-	      "No newsgroups file defined - needed for descriptions");
+	logit(L_BOTH,
+	    "WARNING: No newsgroups file defined - needed for descriptions");
 	return;
     }
 #ifdef STDIO_LOADFILE
     if (!(fp = fopen(newsgroups_path, "r"))) {
-	sprintf(msg, "Could not open newsgroups file '%s'",
+	logit(L_BOTH, "WARNING: Could not open newsgroups file '%s'",
 		newsgroups_path);
-	logit(L_BOTH, "WARNING", msg);
 	return;
     }
     while (fgets(lbuf, sizeof(lbuf) - 1, fp)) {		/* Load them all up */
@@ -96,17 +88,15 @@ static void load_newsgroups(void)
 
 /* Crack it into a name and a description */
 
-	for (name = lbuf; *name; name++) {	/* Ignore leading spaces */
+	for (name = lbuf; *name; name++)	/* Ignore leading spaces */
 	    if (!isspace(*name))
 		break;
-	}
 
-	for (cp = name; *cp; cp++) {
+	for (cp = name; *cp; cp++)
 	    if (isspace(*cp)) {
 		*cp++ = '\0';
 		break;
 	    }
-	}
 
 	while (*cp && isspace(*cp))
 	    cp++;
@@ -127,28 +117,26 @@ static void load_newsgroups(void)
     fclose(fp);
 #else
     if ((fd = open(newsgroups_path, O_RDONLY)) < 0) {
-	sprintf(msg, "Could not open newsgroups file '%s'",
+	logit(L_BOTH, "WARNING: Could not open newsgroups file '%s'",
 		newsgroups_path);
-	logit(L_BOTH, "WARNING", msg);
 	return;
     }
     /* see how big it is */
     if (fstat(fd, &sb) < 0) {
-	sprintf(msg, "Could not stat newsgroups file '%s'",
+	logit(L_BOTH, "WARNING: Could not stat newsgroups file '%s'",
 		newsgroups_path);
-	logit(L_BOTH, "WARNING", msg);
 	return;
     }
     /* grab ourselves a buffer */
     desc = malloc(sb.st_size + 1);
     if (!desc) {
-	logit(L_BOTH, "WARNING", "Could not malloc space for newsgroups");
+	logit(L_BOTH, "WARNING: Could not malloc space for newsgroups");
 	return;
     }
     /* slurp it in */
     length = read(fd, desc, (int) sb.st_size);
     if (length != sb.st_size) {
-	logit(L_BOTH, "WARNING", "Error reading newsgroups");
+	logit(L_BOTH, "WARNING: Error reading newsgroups");
 	return;
     }
     /* terminate the end */
@@ -168,15 +156,13 @@ static void load_newsgroups(void)
 	if ((eoln = strchr(desc, '\n')))
 	    *eoln = 0;
 	else
-	    logit(L_LOG, "WARNING", "premature end of newsgroups file");
+	    logit(L_LOG, "WARNING: premature end of newsgroups file");
 
 	/* locate end of group name */
 	if ((p = strchr(desc, '\t'))) {
-	    /* found it */
-	    *p = 0;
+	    *p = 0;			/* found it */
 
-	    /* gobble whitespace */
-	    while (isspace(*++p));
+	    while (isspace(*++p));	/* gobble whitespace */
 
 	    /* check whether there's still a description to add */
 	    if (*p) {
@@ -184,14 +170,12 @@ static void load_newsgroups(void)
 		 * check if we know about it; first try the current group we're
 		 * up to, to make it fast for sorted active & newsgroups
 		 */
-		if (gp && !strcmp(gp->name, desc)) {
-		    /* add description */
-		    gp->desc = p;
-		} else {
+		if (gp && !strcmp(gp->name, desc))
+		    gp->desc = p;	/* add description */
+		else {
 		    TRAVERSE(active_list, gp) {
 			if (!strcmp(gp->name, desc) && !*gp->desc) {
-			    /* OK, we've found it */
-			    gp->desc = p;
+			    gp->desc = p; /* OK, we've found it */
 
 			    /* jump to the next group for next time around */
 			    NEXT(active_list, gp);

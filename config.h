@@ -12,7 +12,7 @@
 
 /* MAIL_COMMAND is the mailer that accepts a mail with rfc822 headers and
  * body from stdin. */
-#define MAIL_COMMAND	"/usr/sbin/sendmail -t"
+#define MAIL_COMMAND	"/usr/sbin/sendmail -oi -t"
 
 /* With a command like "include alt.*" the resultant list is, long.
  * LOG_MATCH_LIMIT, defines the upper bound on the number of pattern
@@ -33,4 +33,12 @@
 /* I'll enable it. I hope it will not break anything. -- Md */
 /* No luck, it needs more code. */
 /* #define STDIO_READGROUP */
+
+/* allow cleartext passwords in the config file */
+#define CLEARTEXT_PWD
+
+/* this should always be OK */
+/* but is not NFS safe! -- Md */
+/* #define USE_DOTLOCK */
+#define USE_FLOCK
 

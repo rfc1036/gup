@@ -22,7 +22,6 @@
 
 static int mat_compare(const GROUP **g1, const GROUP **g2);
 
-
 extern LIST *sort_groups(LIST *glist)
 {
     LIST *slist;
@@ -47,9 +46,8 @@ extern LIST *sort_groups(LIST *glist)
     /* Build the results list */
     slist = create_list();
 
-    for (st_ix = 0; st_ix < LIST_LENGTH(glist); st_ix++) {
+    for (st_ix = 0; st_ix < LIST_LENGTH(glist); st_ix++)
 	add_group(slist, stab[st_ix]);
-    }
 
     free(stab);
     free(glist);
@@ -64,7 +62,6 @@ static int mat_compare(const GROUP **g1, const GROUP **g2)
     const char *cp1, *cp2;
 
     for (cp1 = (*g1)->name, cp2 = (*g2)->name;; cp1++, cp2++) {
-
 	c1 = *cp1;
 	c2 = *cp2;
 
@@ -72,10 +69,9 @@ static int mat_compare(const GROUP **g1, const GROUP **g2)
 	    return c1 - c2;	/* Hit end of string */
 
 	/* If either character is a meta character, return original order */
-	if ((c1 == '\\') || (c1 == '?') || (c1 == '*') || (c1 == '[')
-	  || (c2 == '\\') || (c2 == '?') || (c2 == '*') || (c2 == '[')) {
+	if ((c1 == '\\') || (c1 == '?') || (c1 == '*') || (c1 == '[') ||
+	    (c2 == '\\') || (c2 == '?') || (c2 == '*') || (c2 == '['))
 	    return (*g1)->order - (*g2)->order;
-	}
 	if (c1 != c2)
 	    return c1 - c2;
     }
