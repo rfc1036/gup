@@ -3,9 +3,6 @@
 
 SHELL+= -e
 
-#export DH_VERBOSE=1
-export DH_COMPAT=4
-
 D := $(CURDIR)/debian/gup
 
 build:

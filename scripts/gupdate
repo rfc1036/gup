@@ -75,7 +75,7 @@ for h in *; do
     host=$h
     if [ -s $h/aliases ]; then
       read aliases junk < $h/aliases
-      host="$host/$aliases"
+      host="$host\/$aliases"
     fi
     sed -e "s/HOST/$host/g" $h/header
     # body
@@ -90,7 +90,7 @@ cd ..
 if [ -s default/global.trailer ]; then
   cat default/global.trailer
 fi
-} >$tmpfeeds
+} > $tmpfeeds
 
 
 # commit the new version
