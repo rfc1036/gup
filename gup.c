@@ -595,9 +595,12 @@ static int insert_group(int not_flag, const char *gname)
     }
 
     if (match_count == 0) {
-	destroy_group(new_gp);
-	logit(L_MAIL, "WARNING: %s pattern not in active - ignored", gname);
-	return FALSE;
+	if (not_flag == GUP_INCLUDE) {
+	    destroy_group(new_gp);
+	    logit(L_MAIL, "WARNING: %s pattern not in active - ignored", gname);
+	    return FALSE;
+	} else
+	    logit(L_MAIL, "WARNING: %s pattern not in active", gname);
     }
     logit(L_MAIL, "");
     if (match_count > 1)

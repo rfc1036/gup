@@ -2,3 +2,5 @@ The program is not enabled by default.
 It will start updating /etc/news/newsfeeds and accepting commands
 only after the creation of /etc/news/newsfeeds.header.
 
+/usr/lib/gup/gupdate may be run with the single argument "force" to
+force rebuilding the newsfeeds file.

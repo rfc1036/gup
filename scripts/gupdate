@@ -41,7 +41,11 @@ reload_thresh=10
 
 # determine what's changed since last time - to save inn from reloading the
 # entire newsfeeds file, and us from wasting our time.
-if [ ! -f $update_stamp ]; then
+if [ "$1" = "force" ]; then
+  echo "full update forced"
+  touch $update_stamp
+  first_update=1
+elif [ ! -f $update_stamp ]; then
   echo "$update_stamp doesn't exist - creating"
   touch $update_stamp
   first_update=1		# this must be our first time
@@ -71,7 +75,7 @@ for h in *; do
     host=$h
     if [ -s $h/aliases ]; then
       read aliases junk < $h/aliases
-      host="$host\/$aliases"
+      host="$host/$aliases"
     fi
     sed -e "s/HOST/$host/g" $h/header
     # body

@@ -9,27 +9,28 @@ export DH_COMPAT=4
 D := $(CURDIR)/debian/gup
 
 build:
-	$(checkdir)
+	dh_testdir
 	make
 	touch build
 
 clean:
-	$(checkdir)
+	dh_testdir
 	-rm -f build
 	make clean
 	dh_clean
 
 binary-arch: checkroot build
-	$(checkdir)
+	dh_testdir
 	dh_clean -k
 
-	dh_installdirs usr/lib/gup
-	install --mode=755 gup scripts/* $D/usr/lib/gup
-	dh_installlogrotate
-	dh_installmanpages
-	dh_installdocs README INSTALL
 	dh_installchangelogs
+	dh_installdocs README INSTALL
+	dh_installdirs /usr/lib/gup
+	install --mode=755 gup scripts/* $D/usr/lib/gup
+	dh_installman gup.8
+	dh_installlogrotate
 	dh_installcron
+
 	dh_strip
 	dh_compress
 	dh_fixperms
@@ -37,10 +38,6 @@ binary-arch: checkroot build
 	dh_shlibdeps
 	dh_gencontrol
 	dh_builddeb
-
-define checkdir
-	test -f debian/rules
-endef
 
 binary: binary-arch
 

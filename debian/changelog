@@ -1,3 +1,13 @@
+gup (0.5.10) unstable; urgency=medium
+
+  * Documented the poison patterns in the man page. (Closes: #179631)
+  * Added a "force" argument to gupdate. (Closes: #181356)
+  * Allow poison and exclude patterns even if they do not match existing
+    groups. (Closes: #181645)
+  * Depends on exim4 instead of exim. (Closes: #228578)
+
+ -- Marco d'Itri <md@linux.it>  Wed, 29 Sep 2004 16:24:09 +0200
+
 gup (0.5.9) unstable; urgency=low
 
   * Rename /etc/logrotate.d/logrotate in /etc/logrotate.d/gup
