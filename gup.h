@@ -26,6 +26,10 @@
 #define	TRUE		1
 #define	FALSE		0
 
+#define GUP_INCLUDE	0
+#define GUP_EXCLUDE	1
+#define GUP_POISON	2
+
 #define	GROUP_OVERFLOW_LP	25	/* Point at which newsgroup newlines */
 
 #define	MAX_LINE_SIZE		512

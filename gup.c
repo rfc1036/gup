@@ -13,6 +13,7 @@
  *      site            name            passwd
  *      include         <group-pattern>
  *      exclude         <group-pattern>
+ *      poison		<group-pattern>
  *      list
  *      newsgroups      <group-pattern>
  *      delete          <group-pattern>
@@ -86,6 +87,7 @@ static int command_cmp(const char *str, const char *cmd);
 static int site(const char **tokens);
 static int include(const char **tokens);
 static int exclude(const char **tokens);
+static int poison(const char **tokens);
 static int insert_group(int not_flag, const char *gname);
 static int delete(const char **tokens);
 static int list(const char **tokens);
@@ -99,6 +101,7 @@ static COMMAND C_list[] =
     {"inc*lude", include, 2, TRUE, FALSE},
     {"+", include, 2, TRUE, FALSE},
     {"exc*lude", exclude, 2, TRUE, FALSE},
+    {"poi*son", poison, 2, TRUE, FALSE},
     {"-", exclude, 2, TRUE, FALSE},
     {"l*ist", list, 0, TRUE, FALSE},
     {"he*lp", help, 0, FALSE, TRUE},
@@ -522,8 +525,10 @@ static void write_groups(void)
     write_count = 0;
     TRAVERSE(group_list, gp) {
 	write_count++;
-	if (gp->u.not)
+	if (gp->u.not == GUP_EXCLUDE)
 	    putc('!', fp);
+	else if (gp->u.not == GUP_POISON)
+	    putc('@', fp);
 	fputs(gp->name, fp);
 	putc('\n', fp);
     }
@@ -551,12 +556,17 @@ static void write_groups(void)
 /* Include a pattern into the site's group list */
 static int include(const char **tokens)
 {
-    return insert_group(FALSE, tokens[0]);
+    return insert_group(GUP_INCLUDE, tokens[0]);
 }
 
 static int exclude(const char **tokens)
 {
-    return insert_group(TRUE, tokens[0]);
+    return insert_group(GUP_EXCLUDE, tokens[0]);
+}
+
+static int poison(const char **tokens)
+{
+    return insert_group(GUP_POISON, tokens[0]);
 }
 
 static int insert_group(int not_flag, const char *gname)
@@ -615,7 +625,8 @@ static int delete(const char **tokens)
 	    match_count++;
 	    if (match_count <= LOG_MATCH_LIMIT)
 		logit(L_MAIL, "\tMatches: %s %s",
-			gp->u.not ? "exclude" : "include", gp->name);
+			(gp->u.not == GUP_EXCLUDE) ? "exclude" : "include",
+			gp->name);
 	    if (match_count == LOG_MATCH_LIMIT)
 		logit(L_MAIL, "\tMatches: ...etc...");
 	    remove_group(group_list, gp);
@@ -668,7 +679,10 @@ static int list(const char **tokens)
 
     group_list = sort_groups(group_list);
     TRAVERSE(group_list, gp) {
-	logit(L_MAIL, "  %s  %s\n", gp->u.not ? "  exclude" : "include",
+	logit(L_MAIL, "  %s  %s\n",
+		(gp->u.not != GUP_INCLUDE) ?
+			((gp->u.not == GUP_POISON) ? " poison" : "  exclude")
+		: "include",
 		gp->name);
     }
     return 0;

@@ -13,9 +13,14 @@ if [ -f /etc/gup.headers ]; then
   OPTM="-m /etc/gup.headers"
 fi
 
+# you can use this file to override the default paths
+if [ -f /etc/gup.paths ]; then
+  . /etc/gup.paths
+fi
+
 # Run the group update program
 # Should not return
-exec /usr/lib/gup/gup $OPTM -d $gup -l /var/log/gup/log
+exec /usr/lib/gup/gup $OPTM $GUPOPTS -d $gup -l /var/log/gup/log
 
 exit 69
 

@@ -1,6 +1,8 @@
 #!/bin/sh -e
 
-if ! id gup >/dev/null 2>&1; then
+create_uid_and_files() {
+
+if ! getent passwd gup >/dev/null; then
   adduser --system --home /var/lib/gup/ --ingroup news \
     --disabled-password --gecos "Group Update Program" gup
 fi
@@ -13,7 +15,7 @@ if [ ! -d /var/lib/gup/default ]; then
   echo -e 'HOST\\\n  :!*,\\' > default/header
   echo -e '  :Tf,Wfb,B4096/1024:' > default/trailer
   ln -s /etc/news/newsfeeds.header default/global.header
-  chown -R gup:news .
+  chown --recursive gup:news .
 fi
 
 if [ ! -f /etc/gup.conf ]; then
@@ -23,8 +25,23 @@ if [ ! -f /etc/gup.conf ]; then
 fi
 
 if [ ! -d /var/log/gup ]; then
-  install -d --owner=gup /var/log/gup
+  install --directory --owner=gup /var/log/gup
 fi
 
+}
+
+case "$1" in
+    configure)
+    create_uid_and_files
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+    echo "postinst called with unknown argument '$1'" >&2
+    exit 1
+esac
+	    
 #DEBHELPER#
 

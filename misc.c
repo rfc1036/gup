@@ -10,8 +10,7 @@ LIST *read_groups(int fd, LIST *exclusion_list)
     LIST *list;
     GROUP *gp;
     char *name;
-    int not;
-    int exclude;
+    int not, exclude;
 #ifdef STDIO_READGROUP
     char *cp;
     char lbuf[MAX_LINE_SIZE];
@@ -37,9 +36,14 @@ LIST *read_groups(int fd, LIST *exclusion_list)
 		break;
 	    }
 
-	not = (*name == '!');
-	if (not)
+	if (name[0] == '!') {
 	    name++;
+	    not = GUP_EXCLUDE;
+	} else if (name[0] == '@') {
+	    name++;
+	    not = GUP_POISON;
+	} else
+	    not = GUP_INCLUDE
 
 	/* check that this group is not on the site's exclusion list */
 	exclude = FALSE;
@@ -90,9 +94,16 @@ LIST *read_groups(int fd, LIST *exclusion_list)
 
 	/* locate end of group name */
 	if ((p = strchr(name, ' ')))
-	    *p = 0;			/* found it */
-	if ((not = (*name == '!')))
+	    *p = '\0';			/* found it */
+
+	if (name[0] == '!') {
 	    name++;
+	    not = GUP_EXCLUDE;
+	} else if (name[0] == '@') {
+	    name++;
+	    not = GUP_POISON;
+	} else
+	    not = GUP_INCLUDE;
 
 	/* check that this group is not on the site's exclusion list */
 	exclude = FALSE;

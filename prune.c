@@ -39,7 +39,7 @@ void prune(LIST *active_l, LIST *group_l)
 	    }
 	}
 	if (ap && ap->u.tag && ap->u.tag->group)
-	    if (! ap->u.tag->group->u.not)
+	    if (ap->u.tag->group->u.not == GUP_INCLUDE)
 		groupcount++;
     }
 
@@ -56,14 +56,14 @@ void prune(LIST *active_l, LIST *group_l)
 	    TAG *tag = ap->u.tag;
 
 	    /* does gp affect ap? */
-	    if (tag && (tag->group == gp) && ((!tag->next && !gp->u.not) ||
-		(tag->next && (tag->next->group->u.not != gp->u.not)))) {
+	    if (tag && tag->group == gp && ((!tag->next && !gp->u.not) ||
+		(tag->next && tag->next->group->u.not != gp->u.not))) {
 		effect = TRUE;
 		break;
 	    }
 	}
 
-	if (!effect) {
+	if (!effect && gp->u.not != GUP_POISON) {
 	    /* group doesn't do anything - clobber it */
 
 	    /*

@@ -4,6 +4,9 @@
 SHELL+= -e
 
 #export DH_VERBOSE=1
+export DH_COMPAT=4
+
+D := $(CURDIR)/debian/gup
 
 build:
 	$(checkdir)
@@ -13,16 +16,16 @@ build:
 clean:
 	$(checkdir)
 	-rm -f build
-	-make clean
-	-cd debian && rm -rf tmp files* substvars *debhelper
+	make clean
+	dh_clean
 
 binary-arch: checkroot build
 	$(checkdir)
-	-rm -rf debian/tmp
+	dh_clean -k
 
-	dh_installdirs usr/lib/gup etc/logrotate.d/
-	install --mode=755 gup scripts/* debian/tmp/usr/lib/gup
-	cp debian/logrotate debian/tmp/etc/logrotate.d/
+	dh_installdirs usr/lib/gup
+	install --mode=755 gup scripts/* $D/usr/lib/gup
+	dh_installlogrotate
 	dh_installmanpages
 	dh_installdocs README INSTALL
 	dh_installchangelogs
@@ -30,9 +33,9 @@ binary-arch: checkroot build
 	dh_strip
 	dh_compress
 	dh_fixperms
+	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol
-	dh_installdeb
 	dh_builddeb
 
 define checkdir

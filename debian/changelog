@@ -1,3 +1,13 @@
+gup (0.5.9) unstable; urgency=low
+
+  * Rename /etc/logrotate.d/logrotate in /etc/logrotate.d/gup
+    (Closes: #172209).
+  * Source a /etc/gup.paths file from the scripts (Closes: #101988).
+  * Added support for poison patterns.
+    Based on a patch by Otmar Lendl <o.lendl@eunet-ag.at>.
+
+ -- Marco d'Itri <md@linux.it>  Sun, 29 Dec 2002 19:16:32 +0100
+
 gup (0.5.8) unstable; urgency=low
 
   * Added all conffiles (Closes: #132206).

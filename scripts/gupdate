@@ -20,6 +20,11 @@ ctlinnd="ctlinnd -t 20"
 # default path
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
+# you can use this file to override the default paths
+if [ -f /etc/gup.paths ]; then
+  . /etc/gup.paths
+fi
+
 ########################### end of user-config stuff ##########################
 cd $gup
 

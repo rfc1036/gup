@@ -8,6 +8,11 @@ gup_uid=gup
 
 def=$gup/default
 
+# you can use this file to override the default paths
+if [ -f /etc/gup.paths ]; then
+  . /etc/gup.paths
+fi
+
 echo "Checking contents of $gup/..."
 if [ ! -e $def/global.header ]; then
   echo ' Missing global header!'; exit 1
