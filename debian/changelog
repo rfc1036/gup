@@ -1,3 +1,11 @@
+gup (0.5.12) unstable; urgency=medium
+
+  * Fixed vlogit() to use va_copy instead of accessing two times a va_list
+    variable, which breaks the program on 64 bit architectures.
+  * Added missing binary-indep target to debian/rules. (Closes: #395695)
+
+ -- Marco d'Itri <md@linux.it>  Tue, 07 Aug 2007 21:15:27 +0200
+
 gup (0.5.11) unstable; urgency=medium
 
   * Fixed aliases files. (Closes: #292275)

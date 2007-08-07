@@ -2,12 +2,12 @@ Source: gup
 Section: news
 Priority: extra
 Maintainer: Marco d'Itri <md@linux.it>
-Standards-Version: 3.6.1.1
+Standards-Version: 3.7.2.2
 Build-Depends: debhelper (>> 4.0.18)
 
 Package: gup
 Architecture: any
-Depends: ${shlibs:Depends}, exim4 | mail-transport-agent
+Depends: ${shlibs:Depends}, exim4 | mail-transport-agent, adduser
 Recommends: inn | inn2
 Description: let a remote site change their newsgroups subscription
  Gup, the Group Update Program is a Unix mail-server that lets a remote

@@ -36,6 +36,8 @@ binary-arch: checkroot build
 	dh_gencontrol
 	dh_builddeb
 
+binary-indep:
+
 binary: binary-arch
 
 checkroot:

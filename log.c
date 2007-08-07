@@ -19,9 +19,11 @@ void vlogit(int lflags, const char *prefix, const char *log_msg, va_list AP)
     time_t secs;
     struct tm *tm;
     char stamp[100];
+    va_list AP2;
 
     static int tried_mail_open = FALSE;
 
+    va_copy(AP2, AP);
     if (lflags & L_TIMESTAMP) {
 	time(&secs);
 	tm = localtime(&secs);
@@ -45,8 +47,9 @@ void vlogit(int lflags, const char *prefix, const char *log_msg, va_list AP)
 	}
 	if (mail_fp)
 	    /* to prevent ordering problems with parts using stdout */
-	    log_line(mail_fp, lflags, stamp, prefix, log_msg, AP);
+	    log_line(mail_fp, lflags, stamp, prefix, log_msg, AP2);
     }
+    va_end(AP2);
 }
 
 void logit(int lflags, const char *log_msg, ...)
