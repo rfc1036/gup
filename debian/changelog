@@ -1,3 +1,9 @@
+gup (0.5.13) unstable; urgency=medium
+
+  * Fixed a bashism in postinst. (Closes: #472228)
+
+ -- Marco d'Itri <md@linux.it>  Fri, 04 Apr 2008 19:19:56 +0200
+
 gup (0.5.12) unstable; urgency=medium
 
   * Fixed vlogit() to use va_copy instead of accessing two times a va_list

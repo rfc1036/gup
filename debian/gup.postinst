@@ -12,14 +12,14 @@ if [ ! -d /var/lib/gup/default ]; then
   echo '| /usr/lib/gup/process' > .forward
   ln -s /etc/gup.conf config
   mkdir default sites
-  echo -e 'HOST\\\n  :!*,\\' > default/header
-  echo -e '  :Tf,Wfb,B4096/1024:' > default/trailer
+  printf 'HOST\\\n  :!*,\\\n' > default/header
+  echo '  :Tf,Wfb,B4096/1024:' > default/trailer
   ln -s /etc/news/newsfeeds.header default/global.header
   chown --recursive gup:news .
 fi
 
 if [ ! -f /etc/gup.conf ]; then
-  echo -e '#site\tpassword\tuser@example.com' > /etc/gup.conf
+  printf '#site\tpassword\tuser@example.com\n' > /etc/gup.conf
   chown gup:news /etc/gup.conf
   chmod 700 /etc/gup.conf
 fi

@@ -2,7 +2,7 @@ Source: gup
 Section: news
 Priority: extra
 Maintainer: Marco d'Itri <md@linux.it>
-Standards-Version: 3.7.2.2
+Standards-Version: 3.7.3
 Build-Depends: debhelper (>> 4.0.18)
 
 Package: gup
