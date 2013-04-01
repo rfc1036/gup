@@ -1,3 +1,12 @@
+gup (0.5.14) unstable; urgency=low
+
+  * Really delete the generated files on purge in postrm, not prerm.
+    (Closes: #668769)
+  * Fixed minus vs. hyphen occurences in gup(8).
+  * Packaging updated to modern standards.
+
+ -- Marco d'Itri <md@linux.it>  Mon, 01 Apr 2013 07:36:31 +0200
+
 gup (0.5.13) unstable; urgency=medium
 
   * Fixed a bashism in postinst. (Closes: #472228)
