@@ -1,0 +1,8 @@
+*.o
+gup
+
+build
+debian/files
+debian/gup.debhelper.log
+debian/gup.substvars
+debian/gup/
