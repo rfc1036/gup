@@ -10,7 +10,7 @@ static const char *hlist[] =
 "The 'site' command *must* come prior to any of the other commands.",
 "After that any order of commands is acceptable. Note that commands are",
 "processed in order and that the 'list' command displays the current state",
-"as affected by any preceeding commands.",
+"as affected by any preceding commands.",
 "",
 "Syntax:",
 "",
