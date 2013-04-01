@@ -12,7 +12,7 @@ that accepts commands by mail to edit a newsgroup subscription
 file for subsequent use by news systems such as
 .I INN
 and
-.IR C\-News .
+.IR C-News .
 .SH SYNTAX
 .B gup
 .RB [ \-hvP ]
@@ -58,14 +58,14 @@ your ``newsfeeds'' or ``sys'' file will
 become a thing of the past.
 .PP
 .I Gup
-is designed to be installed as a mail\-server program
+is designed to be installed as a mail-server program
 that is fed an inbound mail via stdin.
 .I Gup
 is usually
 invoked from a .forward file. Eg:
 .PP
 .nf
-	"|/.../bin/gup -options...."
+	"|/.../bin/gup \-options...."
 .fi
 .PP
 Each site has an
@@ -160,7 +160,7 @@ is unlikely to be of use in a .forward file.
 .BI \-m " reply_headers"
 When
 .I gup
-generates a mail response it only generates the ``TO: '' header line.
+generates a mail response it only generates the ``To: '' header line.
 This option defines the path of
 a file that contains other RFC882 conformant 
 header lines that are piped to the mail program (see the \-M option).
@@ -178,7 +178,7 @@ home directory (see the \-d option).
 pipes the rfc822 headers and the body of the mail to the nominated mail
 program. Normally, this is configured when
 .I gup
-is installed, but it can be over\-ridden with this option. The mail
+is installed, but it can be over-ridden with this option. The mail
 command must be able to determine the recipient addresses from
 the rfc822 headers.
 .TP
@@ -193,7 +193,7 @@ prune superfluous patterns from a site's ``groups'' file. Before
 writing the updated ``groups'' file,
 .I gup
 applies a fairly rigorous test to the patterns, pruning
-any nonsensical or un\-necessary patterns. This pruning process
+any nonsensical or un-necessary patterns. This pruning process
 can be quite CP intensive to the extent that it may have a deleterious
 effect on your system - thus the ability to disable it.
 .TP
@@ -208,7 +208,7 @@ home directory (see the \-d option).
 will try and create this directory if it does not exist.
 .TP
 .B \-v
-Print out the version number and various compile\-time variables,
+Print out the version number and various compile-time variables,
 then exit.
 .SH COMMANDS
 .PP
@@ -284,7 +284,7 @@ Only one
 per
 .I exclude
 command is allowed.
-Aliases: "-" and "exc".
+Aliases: "\-" and "exc".
 .TP
 .BI poison " pattern"
 If the
@@ -352,7 +352,7 @@ has a number of processing stages. The initialization
 stage consists of changing to the home directory (see the \-d option)
 and opening the logfile (see the \-l option). At this time,
 .I gup
-sets the tentative reply\-to mail address to the ``backstop'' mail
+sets the tentative reply-to mail address to the ``backstop'' mail
 address
 defined when 
 .I gup
@@ -362,10 +362,10 @@ administrator).
 The next stage consists of scanning the inbound mail, noting
 .I interesting
 mail headers. The most interesting ones
-are "TO:" and "REPLY\-TO:".
-When a "TO:" header is found it becomes the tentative
-reply\-to mail address. If a "REPLY\-TO:" header is found it over\-rides
-any "TO:" address to become the new tentative reply\-to mail address.
+are "To:" and "Reply\-To:".
+When a "To:" header is found it becomes the tentative
+reply-to mail address. If a "Reply\-To:" header is found it over-rides
+any "To:" address to become the new tentative reply-to mail address.
 A few others
 are noted and logged to help track changes.
 .PP
@@ -375,16 +375,16 @@ is examined for commands. The first command
 be the
 .I site
 command. Any other data results
-in an error mail sent to the tentative reply\-to mail address.
+in an error mail sent to the tentative reply-to mail address.
 If the 
 .I site
 command contains a name that matches an entry in
 the
-``config'' file, then the tentative reply\-to mail address
+``config'' file, then the tentative reply-to mail address
 is replaced with
 the mail address in the ``config'' file.
 .PP
-The reason for these contortions with tentative reply\-to mail
+The reason for these contortions with tentative reply-to mail
 addresses is simply
 to deal with the problem of working out who to send a mail to in 
 the event of an error. Ideally they should all go back to the
@@ -452,7 +452,7 @@ in this file.
 The site name and password are used to check an inbound
 .I site
 command. The password can be crypted or in
-.I plain\-text
+.I plain-text
 so permissions should be carefully set to restrict access. Here's an
 example of a ``config'' file.
 .nf
@@ -479,8 +479,8 @@ apana.*
 !apana.fido.*
 !apana.vortex.*
 alt.bbs.waffle
-alt.cult-movies
-alt.galactic-guide
+alt.cult\-movies
+alt.galactic\-guide
 alt.sport.bowling
 aus.*
 !aus.ai
@@ -496,7 +496,7 @@ but assuming you cater for locking, there is no reason why
 some other process cannot change it too. Whenever
 .I gup
 has to apply changes, it renames this file to ``groups.old''
-prior to re\-writing the ``groups'' file. This gives you some
+prior to re-writing the ``groups'' file. This gives you some
 measure of recovery.
 .SH EXCLUSIONS
 .PP
@@ -511,7 +511,7 @@ cannot possibly include them.
 .SH DIAGNOSTICS
 .PP
 All error conditions are record in the log file and possibly
-the resultant mail \- depending
+the resultant mail - depending
 on the nature of the error. A particular
 problem that is hard to detect is when the .forward file invokes
 .I gup
