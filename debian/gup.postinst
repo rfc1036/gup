@@ -5,6 +5,9 @@ create_uid_and_files() {
 if ! getent passwd gup >/dev/null; then
   adduser --system --home /var/lib/gup/ --ingroup news \
     --disabled-password --gecos "Group Update Program" gup
+elif [ ! -d /var/lib/gup/ ]; then
+  mkdir /var/lib/gup/
+  chown gup:news /var/lib/gup/
 fi
 
 if [ ! -d /var/lib/gup/default ]; then
