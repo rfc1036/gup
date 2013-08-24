@@ -1,3 +1,11 @@
+gup (0.5.15) unstable; urgency=low
+
+  * Appease the piuparts god by making sure that the gup home directory 
+    is created on installs even if the gup user already exists.
+    (Closes: #707938)
+
+ -- Marco d'Itri <md@linux.it>  Sun, 25 Aug 2013 01:21:07 +0200
+
 gup (0.5.14) unstable; urgency=low
 
   * Really delete the generated files on purge in postrm, not prerm.
