@@ -4,6 +4,7 @@ Priority: optional
 Maintainer: Marco d'Itri <md@linux.it>
 Standards-Version: 4.1.1.1
 Build-Depends: debhelper (>> 9)
+Rules-Requires-Root: no
 Vcs-Git: git://github.com/rfc1036/gup.git
 Vcs-Browser: https://github.com/rfc1036/gup
 

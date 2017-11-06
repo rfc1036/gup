@@ -23,8 +23,9 @@ clean:
 	$(MAKE) clean
 	dh_clean
 
-binary-arch: checkroot build
+binary-arch: build
 	dh_testdir
+	dh_testroot
 	dh_prep
 
 	dh_installchangelogs
@@ -51,7 +52,4 @@ build-indep: build
 
 binary: binary-arch
 
-checkroot:
-	test root = "`whoami`"
-
-.PHONY: binary binary-arch binary-indep build-arch build-indep clean checkroot
+.PHONY: binary binary-arch binary-indep build-arch build-indep clean
