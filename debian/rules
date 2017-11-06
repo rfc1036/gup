@@ -42,7 +42,7 @@ binary-arch: checkroot build
 	dh_shlibdeps
 	dh_gencontrol
 	dh_md5sums
-	dh_builddeb -- -Zxz
+	dh_builddeb
 
 binary-indep:
 
