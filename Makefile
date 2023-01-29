@@ -11,7 +11,7 @@ P_LIBS		= -lcrypt
 # not be the most appropriate place - though it doesn't hurt.
 
 BINDIR		= /usr/bin
-MANDIR		= /usr/man/man1
+MANDIR		= /usr/share/man/man8
 
 #################################################
 # DO NOT CHANGE ANYTHING AFTER THIS COMMENT	#
@@ -39,12 +39,12 @@ gup:	$(OBJS)
 # Lazy and safe
 $(OBJS):	$(HDRS) Makefile
 
-install:	$(BINDIR)/gup $(MANDIR)/gup.1
+install:	$(BINDIR)/gup $(MANDIR)/gup.8
 
 $(BINDIR)/gup:	gup
 	cp $? $@
 
-$(MANDIR)/gup.1:	gup.1
+$(MANDIR)/gup.8:	gup.8
 	cp $? $@
 
 clean:
