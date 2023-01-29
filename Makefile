@@ -10,7 +10,7 @@ P_LIBS		= -lcrypt
 # the executable is only used in a .forward so /usr/local/bin may
 # not be the most appropriate place - though it doesn't hurt.
 
-BINDIR		= /usr/bin
+BINDIR		= /usr/lib/gup
 MANDIR		= /usr/share/man/man8
 
 #################################################
