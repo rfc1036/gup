@@ -1,3 +1,9 @@
+gup (0.5.16) unstable; urgency=medium
+
+  * Generally update the packaging for modern times.
+
+ -- Marco d'Itri <md@linux.it>  Sun, 29 Jan 2023 13:46:20 +0100
+
 gup (0.5.15) unstable; urgency=low
 
   * Appease the piuparts god by making sure that the gup home directory 
