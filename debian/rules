@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all future=+lfs
 include /usr/share/dpkg/buildflags.mk
 include /usr/share/dpkg/buildtools.mk
 
