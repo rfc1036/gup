@@ -1,8 +1,7 @@
 *.o
 gup
 
-build
+debian/debhelper-build-stamp
 debian/files
-debian/gup.debhelper.log
 debian/gup.substvars
 debian/gup/
