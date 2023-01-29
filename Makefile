@@ -2,9 +2,11 @@
 # Change the following to suit your needs	#
 #################################################
 
-CC = cc
-P_CFLAGS	= -g -O2 -Wall
-P_LIBS		= -lcrypt
+CC		= cc
+CFLAGS		= -g -O2
+CPPFLAGS	= -Wall
+LDFLAGS		=
+LIBS		= -lcrypt
 
 # Destination directories for the executable and man page. Note that
 # the executable is only used in a .forward so /usr/local/bin may
@@ -23,18 +25,14 @@ SRC	=	gup.c wildmat.c misc.c prune.c help.c mail.c \
 		log.c newsgroups.c lock.c sort.c \
 		rfc822.c
 
-OBJS    =       $(SRC:.c=.o)
+OBJS	=	$(SRC:.c=.o)
 
 HDRS	=	gup.h rfc822.h config.h
-
-CFLAGS  =       $(P_CFLAGS) $(P_NO_FLAGS) $(P_USE_FLAGS) $(P_INCLUDES)
-
-LDFLAGS =       $(P_LDFLAGS) $(P_LIBS)
 
 all:	gup
 
 gup:	$(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) $(LIBS) -o $@
 
 # Lazy and safe
 $(OBJS):	$(HDRS) Makefile
