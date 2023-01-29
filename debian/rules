@@ -2,20 +2,14 @@
 SHELL+= -e
 export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 
-DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
-DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
-  CROSS := CC=$(DEB_HOST_GNU_TYPE)-gcc
-endif
-
-CFLAGS=-g -O2
--include /usr/share/dpkg/buildflags.mk
+include /usr/share/dpkg/buildflags.mk
+include /usr/share/dpkg/buildtools.mk
 
 D := $(CURDIR)/debian/gup
 
 build:
 	dh_testdir
-	$(MAKE) $(CROSS) P_CFLAGS="$(CFLAGS) $(CPPFLAGS)" P_LDFLAGS="$(LDFLAGS)"
+	$(MAKE) CC="$(CC)" P_CFLAGS="$(CFLAGS) $(CPPFLAGS)" P_LDFLAGS="$(LDFLAGS)"
 	touch $@
 
 clean:
