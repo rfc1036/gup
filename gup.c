@@ -355,9 +355,9 @@ static int parse_commands(void)
 	    gupout(0, NULL);
 	}
 
-	/* Does this command require a preceeding site command? */
+	/* Does this command require a preceding site command? */
 	if (cmdp->needs_site && !seen_site)
-	    gupout(0, "'site' command must preceed the '%s' command",
+	    gupout(0, "'site' command must precede the '%s' command",
 		    cmdp->name);
 
 	/* Only check # of args if defined as > 0 */
