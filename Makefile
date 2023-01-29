@@ -39,13 +39,16 @@ gup:	$(OBJS)
 # Lazy and safe
 $(OBJS):	$(HDRS) Makefile
 
-install:	$(BINDIR)/gup $(MANDIR)/gup.8
+install:	$(BINDIR)/gup $(MANDIR)/gup.8 install-scripts
 
 $(BINDIR)/gup:	gup
-	cp $? $@
+	$(INSTALL) $? $(DESTDIR)$@
+
+install-scripts: scripts/addsite scripts/gupdate scripts/process scripts/verify
+	$(INSTALL) --mode=755 $^ $(DESTDIR)/$(BINDIR)/
 
 $(MANDIR)/gup.8:	gup.8
-	cp $? $@
+	cp $? $(DESTDIR)$@
 
 clean:
 	rm -f $(OBJS) gup core a.out
