@@ -6,7 +6,7 @@ gup (0.5.16) unstable; urgency=medium
 
 gup (0.5.15) unstable; urgency=low
 
-  * Appease the piuparts god by making sure that the gup home directory 
+  * Appease the piuparts god by making sure that the gup home directory
     is created on installs even if the gup user already exists.
     (Closes: #707938)
 
